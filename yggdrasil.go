@@ -2,10 +2,7 @@ package blockchainleveldb
 
 import (
 	"github.com/it-chain/leveldb-wrapper"
-	"github.com/it-chain/it-chain-Engine/common"
 )
-
-var logger = common.GetLogger("blockchain_leveldb.go")
 
 const (
 	BLOCK_HASH_DB = "block_hash"
@@ -16,14 +13,14 @@ const (
 	LAST_BLOCK_KEY = "last_block"
 )
 
-type BlockchainLevelDB struct {
+type YggDrasill struct {
 	DBProvider *leveldbwrapper.DBProvider
 }
 
-func NewYggdrasil(levelDBPath string) *BlockchainLevelDB {
+func NewYggdrasil(levelDBPath string) *YggDrasill {
 
 	levelDBProvider := leveldbwrapper.CreateNewDBProvider(levelDBPath)
-	return &BlockchainLevelDB{levelDBProvider}
+	return &YggDrasill{levelDBProvider}
 }
 
 
