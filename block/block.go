@@ -11,6 +11,7 @@ type Block interface{
 	GenerateHash() error
 	GetHash() string
 	GetTransactions() []tx.Transaction
-	GetHeight() int
+	GetHeight() uint64
+	IsPrev(serializedBlock []byte) bool
 }
 

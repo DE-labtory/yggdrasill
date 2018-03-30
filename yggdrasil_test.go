@@ -1,5 +1,43 @@
 package blockchainleveldb
 
+import (
+	"testing"
+	"github.com/it-chain/yggdrasill/block"
+	"fmt"
+)
+
+func TestYggDrasill_GetLastBlock(t *testing.T) {
+	//dbPath := "~/.db"
+	//y := NewYggdrasil(dbPath,nil)
+	//y.AddBlock()
+
+
+}
+
+func TestDeserialize(t *testing.T){
+
+	var block1 block.Block
+
+	block1 = block.DefaultBlock{Header:block.BlockHeader{Height:1,CreatorID:"jun"}}
+
+	b, err := block1.Serialize()
+
+	if err != nil{
+
+	}
+
+	block2 := &block.DefaultBlock{}
+
+	err = deserialize(b,block2)
+
+	if err != nil{
+
+	}
+
+	fmt.Print(block1)
+	fmt.Print(block2)
+}
+
 //func TestBlockchainLevelDB_AddBlock(t *testing.T) {
 //	path := "./test_db"
 //	blockchainLevelDB := CreateNewBlockchainLevelDB(path)

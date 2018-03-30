@@ -13,7 +13,7 @@ import (
 )
 
 type DefaultBlock struct {
-	Header       *BlockHeader
+	Header       BlockHeader
 	MerkleTree   [][]string
 	Transactions []tx.Transaction
 }
@@ -59,6 +59,18 @@ func (block DefaultBlock) GenerateHash() error{
 
 func (block DefaultBlock) GetHash() string{
 	return block.Header.BlockHash
+}
+
+func (block DefaultBlock) GetTransactions() []tx.Transaction{
+	return block.Transactions
+}
+
+func (block DefaultBlock) GetHeight() uint64{
+	return block.Header.Height
+}
+
+func (block DefaultBlock) IsPrev(serializedBlock []byte) bool{
+	return true
 }
 
 func computeSHA256(data []string) string {

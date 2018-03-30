@@ -5,6 +5,9 @@ import (
 	"github.com/it-chain/yggdrasill/validator"
 	"github.com/it-chain/yggdrasill/block"
 	"fmt"
+	"reflect"
+	"encoding/json"
+	"errors"
 )
 
 const (
@@ -19,10 +22,11 @@ const (
 
 type YggDrasill struct {
 	DBProvider *leveldbwrapper.DBProvider
-	Validator validator.Validator
+	Validator  validator.Validator
+	blockType  reflect.Type
 }
 
-func NewYggdrasil(levelDBPath string, validator validator.Validator) *YggDrasill {
+func NewYggdrasil(levelDBPath string, validator validator.Validator,) *YggDrasill {
 
 	levelDBProvider := leveldbwrapper.CreateNewDBProvider(levelDBPath)
 	return &YggDrasill{
@@ -32,6 +36,7 @@ func NewYggdrasil(levelDBPath string, validator validator.Validator) *YggDrasill
 }
 
 func (y YggDrasill) AddBlock(block block.Block) error{
+
 	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
 	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
@@ -39,8 +44,13 @@ func (y YggDrasill) AddBlock(block block.Block) error{
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
 	serializedBlock, err := block.Serialize()
+
 	if err != nil {
 		return err
+	}
+
+	if !block.IsPrev(serializedBlock){
+		return errors.New("height or prevHash is not matched")
 	}
 
 	err = blockHashDB.Put([]byte(block.GetHash()), serializedBlock, true)
@@ -82,10 +92,45 @@ func (y YggDrasill) AddBlock(block block.Block) error{
 
 	return nil
 }
-//
-//func (l *BlockchainLevelDB) Close() {
-//	l.DBProvider.Close()
-//}
+
+func (y YggDrasill) GetLastBlock(block block.Block) error {
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
+
+	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
+
+	if err != nil{
+		return err
+	}
+
+	if serializedBlock == nil{
+		return nil
+	}
+
+	deserialize(serializedBlock,block)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (y YggDrasill) Close() {
+	y.DBProvider.Close()
+}
+
+
+func deserialize(serializedBytes []byte, object interface{}) error {
+	if len(serializedBytes) == 0 {
+		return nil
+	}
+	err := json.Unmarshal(serializedBytes, object)
+	if err != nil {
+		panic(fmt.Sprintf("Error decoding : %s", err))
+	}
+	return err
+}
+
 //
 //func (l *BlockchainLevelDB) AddBlock(block *block.Block) error {
 //	blockHashDB := l.DBProvider.GetDBHandle(BLOCK_HASH_DB)
