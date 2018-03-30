@@ -2,12 +2,16 @@ package blockchainleveldb
 
 import (
 	"github.com/it-chain/leveldb-wrapper"
+	"github.com/it-chain/yggdrasill/validator"
+	"github.com/it-chain/yggdrasill/block"
+	"fmt"
 )
 
 const (
 	BLOCK_HASH_DB = "block_hash"
 	BLOCK_NUMBER_DB = "block_number"
-	UNCONFIRMED_BLOCK_DB = "unconfirmed_block"
+	//UNCONFIRMED는 다시 논의 되어야 할 듯
+	//UNCONFIRMED_BLOCK_DB = "unconfirmed_block"
 	TRANSACTION_DB = "transaction"
 	UTIL_DB = "util"
 	LAST_BLOCK_KEY = "last_block"
@@ -15,15 +19,69 @@ const (
 
 type YggDrasill struct {
 	DBProvider *leveldbwrapper.DBProvider
+	Validator validator.Validator
 }
 
-func NewYggdrasil(levelDBPath string) *YggDrasill {
+func NewYggdrasil(levelDBPath string, validator validator.Validator) *YggDrasill {
 
 	levelDBProvider := leveldbwrapper.CreateNewDBProvider(levelDBPath)
-	return &YggDrasill{levelDBProvider}
+	return &YggDrasill{
+		DBProvider:levelDBProvider,
+		Validator:validator,
+	}
 }
 
+func (y YggDrasill) AddBlock(block block.Block) error{
+	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
+	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
+	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
+	//unconfirmedDB := y.DBProvider.GetDBHandle(UNCONFIRMED_BLOCK_DB)
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
+	serializedBlock, err := block.Serialize()
+	if err != nil {
+		return err
+	}
+
+	err = blockHashDB.Put([]byte(block.GetHash()), serializedBlock, true)
+	if err != nil {
+		return err
+	}
+
+	err = blockNumberDB.Put([]byte(fmt.Sprint(block.GetHeight())), []byte(block.GetHash()), true)
+	if err != nil {
+		return err
+	}
+
+	err = utilDB.Put([]byte(LAST_BLOCK_KEY), serializedBlock, true)
+	if err != nil {
+		return err
+	}
+
+	for _, tx := range block.GetTransactions() {
+		serializedTx, err := tx.Serialize()
+		if err != nil {
+			return err
+		}
+
+		err = transactionDB.Put([]byte(tx.GetID()), serializedTx, true)
+		if err != nil {
+			return err
+		}
+
+		err = utilDB.Put([]byte(tx.GetID()), []byte(block.GetHash()), true)
+		if err != nil {
+			return err
+		}
+	}
+
+	//err = unconfirmedDB.Delete([]byte(block.Header.BlockHash), true)
+	//if err != nil {
+	//	return err
+	//}
+
+	return nil
+}
 //
 //func (l *BlockchainLevelDB) Close() {
 //	l.DBProvider.Close()
