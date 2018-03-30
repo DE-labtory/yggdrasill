@@ -1,0 +1,4 @@
+package: github.com/it-chain/yggdrasill
+import:
+- package: github.com/it-chain/leveldb-wrapper
+  version: v1.0
