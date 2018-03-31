@@ -2,16 +2,14 @@ package blockchainleveldb
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
-	"os"
-
 	"github.com/it-chain/yggdrasill/block"
-	"github.com/it-chain/yggdrasill/util"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestYggDrasill_GetLastBlock(t *testing.T) {
+func TestYggDrasill_AddBlock(t *testing.T) {
 	dbPath := "./.db"
 
 	defer os.RemoveAll(dbPath)
@@ -37,28 +35,24 @@ func TestYggDrasill_GetLastBlock(t *testing.T) {
 	assert.Equal(t, "jun", block2.Header.CreatorID)
 }
 
-func TestDeserialize(t *testing.T) {
+//when height did not matched
+func TestYggDrasill_AddBlock2(t *testing.T) {
+	dbPath := "./.db"
 
-	var block1 block.Block
-
-	block1 = block.DefaultBlock{Header: block.BlockHeader{Height: 1, CreatorID: "jun"}}
-
-	b, err := block1.Serialize()
-
-	if err != nil {
-
-	}
-
-	block2 := &block.DefaultBlock{}
-
-	err = util.Deserialize(b, block2)
+	defer os.RemoveAll(dbPath)
+	y := NewYggdrasil(dbPath, nil)
+	block1 := block.DefaultBlock{Header: block.BlockHeader{Height: 0, CreatorID: "jun"}}
+	block2 := block.DefaultBlock{Header: block.BlockHeader{Height: 2, CreatorID: "jun"}}
+	err := y.AddBlock(block1)
 
 	if err != nil {
-
+		fmt.Print(err.Error())
 	}
 
-	fmt.Print(block1)
-	fmt.Print(block2)
+	err = y.AddBlock(block2)
+
+	fmt.Print(err.Error())
+	assert.Error(t, err)
 }
 
 //func TestBlockchainLevelDB_AddBlock(t *testing.T) {
