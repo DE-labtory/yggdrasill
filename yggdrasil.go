@@ -1,10 +1,10 @@
 package blockchaindb
 
 import(
-	"yggdrasill/validator"
-	"yggdrasill/leveldb"
-	"yggdrasill/block"
-	"yggdrasill/transaction"
+	"github.com/it-chain/yggdrasill/validator"
+	"github.com/it-chain/yggdrasill/leveldb"
+	"github.com/it-chain/yggdrasill/block"
+	"github.com/it-chain/yggdrasill/transaction"
 	"fmt"
 )
 

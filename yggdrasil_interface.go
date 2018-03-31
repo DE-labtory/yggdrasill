@@ -1,8 +1,8 @@
 package blockchaindb
 
 import (
-	"yggdrasill/block"
-	"yggdrasill/transaction"
+	"github.com/it-chain/yggdrasill/block"
+	"github.com/it-chain/yggdrasill/transaction"
 )
 
 type YggdrasilInterface interface {

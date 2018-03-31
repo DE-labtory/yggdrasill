@@ -2,11 +2,11 @@ package leveldb
 
 import (
 	"errors"
-	"yggdrasill/block"
+	"github.com/it-chain/yggdrasill/block"
 	"github.com/it-chain/leveldb-wrapper"
-	"yggdrasill/transaction"
+	"github.com/it-chain/yggdrasill/transaction"
 	"fmt"
-	"yggdrasill/util"
+	"github.com/it-chain/yggdrasill/util"
 )
 
 const (

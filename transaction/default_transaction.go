@@ -2,7 +2,7 @@ package transaction
 
 import (
 	"time"
-	"yggdrasill/util"
+	"github.com/it-chain/yggdrasill/util"
 )
 
 type TransactionStatus int

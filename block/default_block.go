@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	tx "yggdrasill/transaction"
-	"yggdrasill/util"
+	tx "github.com/it-chain/yggdrasill/transaction"
+	"github.com/it-chain/yggdrasill/util"
 )
 
 type DefaultBlock struct {

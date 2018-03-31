@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"yggdrasill/block"
+	"github.com/it-chain/yggdrasill/block"
 	"github.com/stretchr/testify/assert"
 	"fmt"
 	"math/rand"
