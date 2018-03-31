@@ -1,22 +1,23 @@
 package blockchainleveldb
 
 import (
-	"github.com/it-chain/leveldb-wrapper"
-	"github.com/it-chain/yggdrasill/validator"
-	"github.com/it-chain/yggdrasill/block"
+	"errors"
 	"fmt"
 	"reflect"
-	"encoding/json"
-	"errors"
+
+	"github.com/it-chain/leveldb-wrapper"
+	"github.com/it-chain/yggdrasill/block"
+	"github.com/it-chain/yggdrasill/util"
+	"github.com/it-chain/yggdrasill/validator"
 )
 
 const (
-	BLOCK_HASH_DB = "block_hash"
+	BLOCK_HASH_DB   = "block_hash"
 	BLOCK_NUMBER_DB = "block_number"
 	//UNCONFIRMED는 다시 논의 되어야 할 듯
 	//UNCONFIRMED_BLOCK_DB = "unconfirmed_block"
 	TRANSACTION_DB = "transaction"
-	UTIL_DB = "util"
+	UTIL_DB        = "util"
 	LAST_BLOCK_KEY = "last_block"
 )
 
@@ -26,16 +27,16 @@ type YggDrasill struct {
 	blockType  reflect.Type
 }
 
-func NewYggdrasil(levelDBPath string, validator validator.Validator,) *YggDrasill {
+func NewYggdrasil(levelDBPath string, validator validator.Validator) *YggDrasill {
 
 	levelDBProvider := leveldbwrapper.CreateNewDBProvider(levelDBPath)
 	return &YggDrasill{
-		DBProvider:levelDBProvider,
-		Validator:validator,
+		DBProvider: levelDBProvider,
+		Validator:  validator,
 	}
 }
 
-func (y YggDrasill) AddBlock(block block.Block) error{
+func (y YggDrasill) AddBlock(block block.Block) error {
 
 	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
 	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
@@ -49,7 +50,7 @@ func (y YggDrasill) AddBlock(block block.Block) error{
 		return err
 	}
 
-	if !block.IsPrev(serializedBlock){
+	if !block.IsPrev(serializedBlock) {
 		return errors.New("height or prevHash is not matched")
 	}
 
@@ -98,15 +99,15 @@ func (y YggDrasill) GetLastBlock(block block.Block) error {
 
 	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
 
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
-	if serializedBlock == nil{
+	if serializedBlock == nil {
 		return nil
 	}
 
-	deserialize(serializedBlock,block)
+	util.Deserialize(serializedBlock, block)
 
 	if err != nil {
 		return err
@@ -117,18 +118,6 @@ func (y YggDrasill) GetLastBlock(block block.Block) error {
 
 func (y YggDrasill) Close() {
 	y.DBProvider.Close()
-}
-
-
-func deserialize(serializedBytes []byte, object interface{}) error {
-	if len(serializedBytes) == 0 {
-		return nil
-	}
-	err := json.Unmarshal(serializedBytes, object)
-	if err != nil {
-		panic(fmt.Sprintf("Error decoding : %s", err))
-	}
-	return err
 }
 
 //

@@ -1,15 +1,15 @@
 package block
 
 import (
-	"time"
-	tx "github.com/it-chain/yggdrasill/transaction"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"sort"
 	"strings"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
+	"time"
+
+	tx "github.com/it-chain/yggdrasill/transaction"
+	"github.com/it-chain/yggdrasill/util"
 )
 
 type DefaultBlock struct {
@@ -31,21 +31,21 @@ type BlockHeader struct {
 	TransactionCount   int
 }
 
-func (block DefaultBlock) PutTransaction(transaction tx.Transaction){
+func (block DefaultBlock) PutTransaction(transaction tx.Transaction) {
 
 	block.Transactions = append(block.Transactions, transaction)
 	block.Header.TransactionCount++
 }
 
-func (block DefaultBlock) FindTransactionIndexByHash(txHash string){
+func (block DefaultBlock) FindTransactionIndexByHash(txHash string) {
 
 }
 
-func (block DefaultBlock) Serialize() ([]byte, error){
-	return serialize(block)
+func (block DefaultBlock) Serialize() ([]byte, error) {
+	return util.Serialize(block)
 }
 
-func (block DefaultBlock) GenerateHash() error{
+func (block DefaultBlock) GenerateHash() error {
 
 	if block.Header.MerkleTreeRootHash == "" {
 		return errors.New("no merkle tree root hash")
@@ -57,19 +57,19 @@ func (block DefaultBlock) GenerateHash() error{
 	return nil
 }
 
-func (block DefaultBlock) GetHash() string{
+func (block DefaultBlock) GetHash() string {
 	return block.Header.BlockHash
 }
 
-func (block DefaultBlock) GetTransactions() []tx.Transaction{
+func (block DefaultBlock) GetTransactions() []tx.Transaction {
 	return block.Transactions
 }
 
-func (block DefaultBlock) GetHeight() uint64{
+func (block DefaultBlock) GetHeight() uint64 {
 	return block.Header.Height
 }
 
-func (block DefaultBlock) IsPrev(serializedBlock []byte) bool{
+func (block DefaultBlock) IsPrev(serializedBlock []byte) bool {
 	return true
 }
 
@@ -81,15 +81,6 @@ func computeSHA256(data []string) string {
 	hash.Write([]byte(arg))
 	return hex.EncodeToString(hash.Sum(nil))
 }
-
-func serialize(object interface{}) ([]byte, error) {
-	data, err := json.Marshal(object)
-	if err != nil {
-		return nil,errors.New(fmt.Sprintf("Error encoding : %s", err))
-	}
-	return data, nil
-}
-
 
 //
 //func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
