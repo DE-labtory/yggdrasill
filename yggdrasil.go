@@ -5,7 +5,6 @@ import(
 	"github.com/it-chain/yggdrasill/leveldb"
 	"github.com/it-chain/yggdrasill/block"
 	"github.com/it-chain/yggdrasill/transaction"
-	"fmt"
 )
 
 type Yggdrasil struct {
@@ -18,11 +17,9 @@ func NewYggdrasil(dbType string, validator validator.Validator, opts map[string]
 	var db YggdrasilInterface
 
 	switch dbType {
-	case "leveldb":
+	default :
 		db = leveldb.NewLevelDB(opts)
 		break
-	default :
-		panic(fmt.Sprint("Unsupported DB Type"))
 	}
 
 	return &Yggdrasil{dbType: dbType, db: db, validator: validator}
