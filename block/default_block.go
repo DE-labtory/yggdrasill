@@ -70,7 +70,17 @@ func (block DefaultBlock) GetHeight() uint64 {
 }
 
 func (block DefaultBlock) IsPrev(serializedBlock []byte) bool {
-	return true
+	lastBlock := &DefaultBlock{}
+	err := util.Deserialize(serializedBlock, lastBlock)
+
+	if err != nil {
+		return false
+	}
+
+	if (block.GetHeight() == lastBlock.GetHeight()+1) && (lastBlock.GetHash() == block.Header.PreviousHash) {
+		return true
+	}
+	return false
 }
 
 func computeSHA256(data []string) string {

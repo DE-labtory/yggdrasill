@@ -1,36 +1,59 @@
 package blockchainleveldb
 
 import (
-	"testing"
-	"github.com/it-chain/yggdrasill/block"
 	"fmt"
+	"testing"
+
+	"os"
+
+	"github.com/it-chain/yggdrasill/block"
+	"github.com/it-chain/yggdrasill/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestYggDrasill_GetLastBlock(t *testing.T) {
-	//dbPath := "~/.db"
-	//y := NewYggdrasil(dbPath,nil)
-	//y.AddBlock()
+	dbPath := "./.db"
 
+	defer os.RemoveAll(dbPath)
+	y := NewYggdrasil(dbPath, nil)
+	block1 := block.DefaultBlock{Header: block.BlockHeader{Height: 0, CreatorID: "jun"}}
+	err := y.AddBlock(block1)
 
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	block2 := &block.DefaultBlock{}
+
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	y.GetLastBlock(block2)
+
+	assert.Equal(t, block1.GetHeight(), block2.GetHeight())
+	assert.Equal(t, uint64(0), block1.GetHeight())
+	assert.Equal(t, uint64(0), block2.GetHeight())
+	assert.Equal(t, "jun", block2.Header.CreatorID)
 }
 
-func TestDeserialize(t *testing.T){
+func TestDeserialize(t *testing.T) {
 
 	var block1 block.Block
 
-	block1 = block.DefaultBlock{Header:block.BlockHeader{Height:1,CreatorID:"jun"}}
+	block1 = block.DefaultBlock{Header: block.BlockHeader{Height: 1, CreatorID: "jun"}}
 
 	b, err := block1.Serialize()
 
-	if err != nil{
+	if err != nil {
 
 	}
 
 	block2 := &block.DefaultBlock{}
 
-	err = deserialize(b,block2)
+	err = util.Deserialize(b, block2)
 
-	if err != nil{
+	if err != nil {
 
 	}
 

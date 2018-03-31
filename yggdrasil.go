@@ -38,11 +38,14 @@ func NewYggdrasil(levelDBPath string, validator validator.Validator) *YggDrasill
 
 func (y YggDrasill) AddBlock(block block.Block) error {
 
-	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
-	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
-	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
-	//unconfirmedDB := y.DBProvider.GetDBHandle(UNCONFIRMED_BLOCK_DB)
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
+
+	//check last block
+	lastSerializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
+
+	if err != nil {
+		return err
+	}
 
 	serializedBlock, err := block.Serialize()
 
@@ -50,11 +53,56 @@ func (y YggDrasill) AddBlock(block block.Block) error {
 		return err
 	}
 
-	if !block.IsPrev(serializedBlock) {
+	//if there is no last block -> create first
+	if lastSerializedBlock == nil {
+		y.addBlock(block, serializedBlock)
+		return nil
+	}
+
+	if !block.IsPrev(lastSerializedBlock) {
 		return errors.New("height or prevHash is not matched")
 	}
 
-	err = blockHashDB.Put([]byte(block.GetHash()), serializedBlock, true)
+	y.addBlock(block, serializedBlock)
+
+	return nil
+}
+
+func (y YggDrasill) GetLastBlock(block block.Block) error {
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
+
+	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
+
+	if err != nil {
+		return err
+	}
+
+	if serializedBlock == nil {
+		return nil
+	}
+
+	util.Deserialize(serializedBlock, block)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (y YggDrasill) Close() {
+	y.DBProvider.Close()
+}
+
+func (y YggDrasill) addBlock(block block.Block, serializedBlock []byte) error {
+
+	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
+	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
+	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
+	//unconfirmedDB := y.DBProvider.GetDBHandle(UNCONFIRMED_BLOCK_DB)
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
+
+	err := blockHashDB.Put([]byte(block.GetHash()), serializedBlock, true)
 	if err != nil {
 		return err
 	}
@@ -86,38 +134,7 @@ func (y YggDrasill) AddBlock(block block.Block) error {
 		}
 	}
 
-	//err = unconfirmedDB.Delete([]byte(block.Header.BlockHash), true)
-	//if err != nil {
-	//	return err
-	//}
-
 	return nil
-}
-
-func (y YggDrasill) GetLastBlock(block block.Block) error {
-	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
-
-	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
-
-	if err != nil {
-		return err
-	}
-
-	if serializedBlock == nil {
-		return nil
-	}
-
-	util.Deserialize(serializedBlock, block)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (y YggDrasill) Close() {
-	y.DBProvider.Close()
 }
 
 //
