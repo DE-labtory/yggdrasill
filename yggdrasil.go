@@ -1,33 +1,142 @@
 package blockchainleveldb
 
 import (
+	"errors"
+	"fmt"
+	"reflect"
+
 	"github.com/it-chain/leveldb-wrapper"
+	"github.com/it-chain/yggdrasill/block"
+	"github.com/it-chain/yggdrasill/util"
+	"github.com/it-chain/yggdrasill/validator"
 )
 
 const (
-	BLOCK_HASH_DB = "block_hash"
+	BLOCK_HASH_DB   = "block_hash"
 	BLOCK_NUMBER_DB = "block_number"
-	UNCONFIRMED_BLOCK_DB = "unconfirmed_block"
+	//UNCONFIRMED는 다시 논의 되어야 할 듯
+	//UNCONFIRMED_BLOCK_DB = "unconfirmed_block"
 	TRANSACTION_DB = "transaction"
-	UTIL_DB = "util"
+	UTIL_DB        = "util"
 	LAST_BLOCK_KEY = "last_block"
 )
 
 type YggDrasill struct {
 	DBProvider *leveldbwrapper.DBProvider
+	Validator  validator.Validator
+	blockType  reflect.Type
 }
 
-func NewYggdrasil(levelDBPath string) *YggDrasill {
+func NewYggdrasil(levelDBPath string, validator validator.Validator) *YggDrasill {
 
 	levelDBProvider := leveldbwrapper.CreateNewDBProvider(levelDBPath)
-	return &YggDrasill{levelDBProvider}
+	return &YggDrasill{
+		DBProvider: levelDBProvider,
+		Validator:  validator,
+	}
 }
 
+func (y YggDrasill) AddBlock(block block.Block) error {
 
-//
-//func (l *BlockchainLevelDB) Close() {
-//	l.DBProvider.Close()
-//}
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
+
+	//check last block
+	lastSerializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
+
+	if err != nil {
+		return err
+	}
+
+	serializedBlock, err := block.Serialize()
+
+	if err != nil {
+		return err
+	}
+
+	//if there is no last block -> create first
+	if lastSerializedBlock == nil {
+		y.addBlock(block, serializedBlock)
+		return nil
+	}
+
+	if !block.IsPrev(lastSerializedBlock) {
+		return errors.New("height or prevHash is not matched")
+	}
+
+	y.addBlock(block, serializedBlock)
+
+	return nil
+}
+
+func (y YggDrasill) GetLastBlock(block block.Block) error {
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
+
+	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
+
+	if err != nil {
+		return err
+	}
+
+	if serializedBlock == nil {
+		return nil
+	}
+
+	util.Deserialize(serializedBlock, block)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (y YggDrasill) Close() {
+	y.DBProvider.Close()
+}
+
+func (y YggDrasill) addBlock(block block.Block, serializedBlock []byte) error {
+
+	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
+	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
+	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
+	//unconfirmedDB := y.DBProvider.GetDBHandle(UNCONFIRMED_BLOCK_DB)
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
+
+	err := blockHashDB.Put([]byte(block.GetHash()), serializedBlock, true)
+	if err != nil {
+		return err
+	}
+
+	err = blockNumberDB.Put([]byte(fmt.Sprint(block.GetHeight())), []byte(block.GetHash()), true)
+	if err != nil {
+		return err
+	}
+
+	err = utilDB.Put([]byte(LAST_BLOCK_KEY), serializedBlock, true)
+	if err != nil {
+		return err
+	}
+
+	for _, tx := range block.GetTransactions() {
+		serializedTx, err := tx.Serialize()
+		if err != nil {
+			return err
+		}
+
+		err = transactionDB.Put([]byte(tx.GetID()), serializedTx, true)
+		if err != nil {
+			return err
+		}
+
+		err = utilDB.Put([]byte(tx.GetID()), []byte(block.GetHash()), true)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 //
 //func (l *BlockchainLevelDB) AddBlock(block *block.Block) error {
 //	blockHashDB := l.DBProvider.GetDBHandle(BLOCK_HASH_DB)

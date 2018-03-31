@@ -1,12 +1,14 @@
-hash: ae17b7229979e62328f35a8da86cdb7a48aaaa29fff619606f6ab2273646319b
-updated: 2018-03-30T22:41:21.58362+09:00
+hash: 55b980f10b7864082c08346bf40d093c9dd9ddac70f709ca4aa5e4b83022478f
+updated: 2018-03-31T12:39:42.498467+09:00
 imports:
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/it-chain/leveldb-wrapper
   version: eea2a1f59356862065df98eaedfc0f62edda0c15
+- name: github.com/stretchr/testify
+  version: 12b6f73e6084dad08a7c6e575284b177ecafbc71
 - name: github.com/syndtr/goleveldb
-  version: 169b1b37be738edb2813dab48c97a549bcf99bb5
+  version: 714f901b98fdb3aa954b4193d8cbd64a28d80cad
   subpackages:
   - leveldb
   - leveldb/cache

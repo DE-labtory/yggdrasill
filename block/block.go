@@ -10,5 +10,8 @@ type Block interface{
 	Serialize() ([]byte, error)
 	GenerateHash() error
 	GetHash() string
+	GetTransactions() []tx.Transaction
+	GetHeight() uint64
+	IsPrev(serializedBlock []byte) bool
 }
 
