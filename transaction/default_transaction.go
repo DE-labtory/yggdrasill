@@ -1,6 +1,9 @@
 package transaction
 
-import "time"
+import (
+	"time"
+	"github.com/it-chain/yggdrasill/util"
+)
 
 type TransactionStatus int
 type TxDataType string
@@ -8,7 +11,6 @@ type TransactionType int
 type FunctionType string
 
 const (
-
 	Status_TRANSACTION_UNCONFIRMED	TransactionStatus	= 0
 	Status_TRANSACTION_CONFIRMED	TransactionStatus	= 1
 	Status_TRANSACTION_UNKNOWN		TransactionStatus	= 2
@@ -45,6 +47,15 @@ type DefaultTransaction struct {
 	TimeStamp         time.Time
 	TxData            *TxData
 }
+
+func (t DefaultTransaction) Serialize() ([]byte, error){
+	return util.Serialize(t)
+}
+
+func (t DefaultTransaction) GetID() string{
+	return t.TransactionID
+}
+
 //
 //func CreateNewTransaction(peer_id string, tx_id string, tx_type TransactionType, t time.Time, data *TxData) *Transaction{
 //
