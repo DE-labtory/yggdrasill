@@ -1,23 +1,26 @@
 package blockchaindb
 
 import (
+	"fmt"
+	"math/rand"
 	"os"
 	"testing"
 
+	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill/block"
 	"github.com/stretchr/testify/assert"
-	"fmt"
-	"math/rand"
 )
 
 func TestYggDrasill_AddBlock(t *testing.T) {
+
 	dbPath := "./.db"
 	opts := map[string]interface{}{
-		"db_path" : dbPath,
+		"db_path": dbPath,
 	}
 
-	y := NewYggdrasil("leveldb", nil, opts)
-	defer func(){
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
@@ -38,13 +41,16 @@ func TestYggDrasill_AddBlock(t *testing.T) {
 
 //when height did not matched
 func TestYggDrasill_AddBlock2(t *testing.T) {
+
 	dbPath := "./.db"
 	opts := map[string]interface{}{
-		"db_path" : dbPath,
+		"db_path": dbPath,
 	}
 
-	y := NewYggdrasil("leveldb", nil, opts)
-	defer func(){
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+
+	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
@@ -60,21 +66,23 @@ func TestYggDrasill_AddBlock2(t *testing.T) {
 }
 
 func TestYggdrasil_GetBlockByNumber(t *testing.T) {
+
 	dbPath := "./.db"
 	opts := map[string]interface{}{
-		"db_path" : dbPath,
+		"db_path": dbPath,
 	}
 
-	y := NewYggdrasil("leveldb", nil, opts)
-	defer func(){
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
 
-	for i := 0 ; i < 100 ; i++ {
+	for i := 0; i < 100; i++ {
 		tmpBlock := block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
 		if i > 0 {
-			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i - 1)
+			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
 		}
 
 		err := y.AddBlock(tmpBlock)
@@ -92,21 +100,23 @@ func TestYggdrasil_GetBlockByNumber(t *testing.T) {
 }
 
 func TestYggdrasil_GetBlockByHash(t *testing.T) {
+
 	dbPath := "./.db"
 	opts := map[string]interface{}{
-		"db_path" : dbPath,
+		"db_path": dbPath,
 	}
 
-	y := NewYggdrasil("leveldb", nil, opts)
-	defer func(){
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
 
-	for i := 0 ; i < 100 ; i++ {
+	for i := 0; i < 100; i++ {
 		tmpBlock := block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
 		if i > 0 {
-			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i - 1)
+			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
 		}
 
 		err := y.AddBlock(tmpBlock)
@@ -124,21 +134,23 @@ func TestYggdrasil_GetBlockByHash(t *testing.T) {
 }
 
 func TestYggdrasil_GetLastBlock(t *testing.T) {
+
 	dbPath := "./.db"
 	opts := map[string]interface{}{
-		"db_path" : dbPath,
+		"db_path": dbPath,
 	}
 
-	y := NewYggdrasil("leveldb", nil, opts)
-	defer func(){
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
 
-	for i := 0 ; i < 100 ; i++ {
+	for i := 0; i < 100; i++ {
 		tmpBlock := block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
 		if i > 0 {
-			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i - 1)
+			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
 		}
 
 		err := y.AddBlock(tmpBlock)
@@ -154,26 +166,30 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 }
 
 func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
+
 	dbPath := "./.db"
 	opts := map[string]interface{}{
-		"db_path" : dbPath,
+		"db_path": dbPath,
 	}
 
-	y := NewYggdrasil("leveldb", nil, opts)
-	defer func(){
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
 }
 
 func TestYggdrasil_GetBlockByTxID(t *testing.T) {
+
 	dbPath := "./.db"
 	opts := map[string]interface{}{
-		"db_path" : dbPath,
+		"db_path": dbPath,
 	}
 
-	y := NewYggdrasil("leveldb", nil, opts)
-	defer func(){
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
