@@ -5,5 +5,6 @@ package transaction
 type Transaction interface{
 	Serialize() ([]byte, error)
 	GetID() string
+	CalculateHash() []byte
 }
 

@@ -1,8 +1,14 @@
 package validator
 
+import (
+	"github.com/yggdrasill/block"
+	"github.com/yggdrasill/transaction"
+)
+
 type Validator interface{
-	BuildTree(content []Content) error
+	BuildTree(block block.Block) error
 	ReBuildTree() error
-	VerifyContent(content Content) (bool, error)
+	VerifyTx(tx transaction.Transaction) (bool, error)
+	VerifyTree() bool
 }
 
