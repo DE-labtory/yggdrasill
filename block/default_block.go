@@ -187,34 +187,14 @@ func computeSHA256(data []string) string {
 //	}
 //}
 //
+//todo validator로
 //func (s Block) MakeMerklePath(idx int) (path []string){
 //	for i := 0; i < s.MerkleTreeHeight-1; i++{
 //		path = append(path, s.MerkleTree[i][(idx >> uint(i)) ^ 1])
 //	}
 //	return path
 //}
-//
-//func (s *Block) GenerateBlockHash() error{
-//
-//	if s.Header.MerkleTreeRootHash == "" {
-//		return errors.New("no merkle tree root hash")
-//	}
-//
-//	str := []string{s.Header.MerkleTreeRootHash, s.Header.TimeStamp.String(), s.Header.PreviousHash}
-//	s.Header.BlockHash = common.ComputeSHA256(str)
-//	return nil
-//}
-//
-//func (s Block) BlockSerialize() ([]byte, error){
-//	return common.Serialize(s)
-//}
-//
-//func BlockDeserialize(by []byte) (Block, error) {
-//	block := Block{}
-//	err := common.Deserialize(by, &block)
-//	return block, err
-//}
-//
+////todo 이부분도 Validator로
 //// 해당 트랜잭션이 정당한지 머클패스로 검사함
 //func (s Block) VerifyTx(tx transaction.Transaction) (bool, error) {
 //
@@ -243,6 +223,7 @@ func computeSHA256(data []string) string {
 //	}
 //}
 //
+//todo 이부분은 Validator로
 //// 블럭내의 모든 트랜잭션들이 정당한지 머클패스로 검사함
 //func (s Block) VerifyBlock() (bool, error) {
 //	for idx := 0; idx < s.TransactionCount; idx++{

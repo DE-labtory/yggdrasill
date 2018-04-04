@@ -1,7 +1,6 @@
 package blockchaindb
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
@@ -42,8 +41,9 @@ func (y *Yggdrasil) AddBlock(block block.Block) error {
 	if err != nil {
 		return err
 	}
+
 	if lastBlock != nil && !block.IsPrev(lastBlock) {
-		return errors.New("height or prevHash is not matched")
+		return NewBlockError("height or prevHash is not matched")
 	}
 
 	serializedBlock, err := block.Serialize()
