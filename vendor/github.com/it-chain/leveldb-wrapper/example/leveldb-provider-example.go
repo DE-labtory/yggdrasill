@@ -19,4 +19,3 @@ func main(){
 
 	fmt.Printf("%s",name)
 }
-

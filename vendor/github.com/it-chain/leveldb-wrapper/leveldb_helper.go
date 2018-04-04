@@ -5,13 +5,13 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"fmt"
-	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/util"
 	"errors"
 	"strings"
 	"os"
 	"path"
 	"io"
+	"github.com/it-chain/leveldb-wrapper/key_value_db"
 )
 
 type dbState int32
@@ -34,6 +34,7 @@ type DB struct {
 
 //tested
 func CreateNewDB(levelDbPath string) *DB {
+
 	readOpts := &opt.ReadOptions{}
 	writeOptsNoSync := &opt.WriteOptions{false,false}
 	writeOptsSync := &opt.WriteOptions{}
@@ -121,6 +122,7 @@ func (db *DB) Put(key []byte, value []byte, sync bool) error {
 	return nil
 }
 
+
 // Delete deletes the given key
 func (db *DB) Delete(key []byte, sync bool) error {
 	wo := db.writeOptsNoSync
@@ -134,8 +136,23 @@ func (db *DB) Delete(key []byte, sync bool) error {
 	return nil
 }
 
+
 // WriteBatch writes a batch
-func (db *DB) WriteBatch(batch *leveldb.Batch, sync bool) error {
+func (db *DB) WriteBatch(KVs map[string][]byte, sync bool) error {
+	batch := &leveldb.Batch{}
+	for k, v := range KVs {
+		key := []byte(k)
+		if v == nil {
+			batch.Delete(key)
+		} else {
+			batch.Put(key, v)
+		}
+	}
+
+	return db.writeBatch(batch, sync)
+}
+
+func (db *DB) writeBatch(batch *leveldb.Batch, sync bool) error {
 	wo := db.writeOptsNoSync
 	if sync {
 		wo = db.writeOptsSync
@@ -146,11 +163,11 @@ func (db *DB) WriteBatch(batch *leveldb.Batch, sync bool) error {
 	return nil
 }
 
-func (db *DB) GetIterator(startKey []byte, endKey []byte) iterator.Iterator {
+func (db *DB) GetIterator(startKey []byte, endKey []byte) key_value_db.KeyValueDBIterator {
 	return db.db.NewIterator(&util.Range{Start: startKey, Limit: endKey}, db.readOpts)
 }
 
-func (db *DB) GetIteratorWithPrefix(prefix []byte) iterator.Iterator {
+func (db *DB) GetIteratorWithPrefix(prefix []byte) key_value_db.KeyValueDBIterator {
 	return db.db.NewIterator(util.BytesPrefix(prefix), db.readOpts)
 }
 

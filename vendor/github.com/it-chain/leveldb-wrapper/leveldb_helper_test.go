@@ -155,7 +155,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	//then
 	batch := new(leveldb.Batch)
 	batch.Put([]byte("jun"), []byte("jun"))
-	db.WriteBatch(batch,true)
+	db.writeBatch(batch,true)
 
 	//result
 	byteValue, err := db.db.Get([]byte("jun"),nil)
@@ -178,7 +178,9 @@ func TestDB_snapSnapshot(t *testing.T) {
 	batch.Put([]byte("key1"), []byte("val1"))
 	batch.Put([]byte("key2"), []byte("val2"))
 	batch.Put([]byte("key3"), []byte("val3"))
-	db.WriteBatch(batch,true)
+
+
+	db.writeBatch(batch,true)
 
 	
 	snap, err := db.Snapshot()
