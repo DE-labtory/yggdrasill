@@ -1,26 +1,25 @@
-package leveldbwrapper
+package blockchaindb
 
 import (
 	"sync"
-	"github.com/syndtr/goleveldb/leveldb"
+
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
 )
 
 type DBHandle struct {
-	dbName	string
-	db		*DB
+	dbName string
+	db     key_value_db.KeyValueDB
 }
 
 type DBProvider struct {
-	db			*DB
-	mux			sync.Mutex
-	dbHandles	map[string]*DBHandle
+	db        key_value_db.KeyValueDB
+	mux       sync.Mutex
+	dbHandles map[string]*DBHandle
 }
 
-func CreateNewDBProvider(levelDbPath string) *DBProvider {
-	db := CreateNewDB(levelDbPath)
-	db.Open()
-	return &DBProvider{db, sync.Mutex{}, make(map[string]*DBHandle)}
+func CreateNewDBProvider(keyValueDB key_value_db.KeyValueDB) *DBProvider {
+	keyValueDB.Open()
+	return &DBProvider{keyValueDB, sync.Mutex{}, make(map[string]*DBHandle)}
 }
 
 func (p *DBProvider) Close() {
@@ -53,16 +52,7 @@ func (h *DBHandle) Delete(key []byte, sync bool) error {
 }
 
 func (h *DBHandle) WriteBatch(KVs map[string][]byte, sync bool) error {
-	batch := &leveldb.Batch{}
-	for k, v := range KVs {
-		key := dbKey(h.dbName, []byte(k))
-		if v == nil {
-			batch.Delete(key)
-		} else {
-			batch.Put(key, v)
-		}
-	}
-	return h.db.writeBatch(batch, sync)
+	return h.db.WriteBatch(KVs, sync)
 }
 
 func (h *DBHandle) GetIteratorWithPrefix() key_value_db.KeyValueDBIterator {
