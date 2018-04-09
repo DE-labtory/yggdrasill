@@ -9,7 +9,6 @@ type Validator interface{
 	BuildTree(block block.Block) error
 	ReBuildTree() error
 	VerifyTx(tx transaction.Transaction) (bool, error)
-	VerifyTree() bool
 	StoredTree(block block.Block) error
 }
 

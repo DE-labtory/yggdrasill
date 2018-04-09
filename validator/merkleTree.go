@@ -16,18 +16,6 @@ type MerkleTree struct {
 	TxCount    int
 }
 
-func (n *Node) MakeNodeHash() []byte {
-	if n.leaf {
-		return n.tx.CalculateHash()
-	}
-	h := sha256.New()
-	if n.Left.Hash != nil && n.Right.Hash != nil {
-		h.Write(append(n.Left.Hash, n.Right.Hash...))
-	}
-	h.Write(append(n.Left.MakeNodeHash(), n.Right.MakeNodeHash()...))
-	return h.Sum(nil)
-}
-
 func (m *MerkleTree) BuildTree(block block.Block) error {
 	txList := block.GetTransactions()
 	if len(txList) == 0 {
@@ -115,28 +103,32 @@ func (m *MerkleTree) ReBuildTree() error {
 	return nil
 }
 
-func (m *MerkleTree) VerifyTree() bool {
-	calculatedMerkleRootHash := m.Root.MakeNodeHash()
-	if bytes.Compare(m.RootHash, calculatedMerkleRootHash) == 0 {
-		return true
+func (m MerkleTree) MakeMerklePath(idx int) [][]byte {
+	var path [][]byte
+	for i := 0; i < m.TreeHeight-1; i++ {
+		path = append(path, m.Tree[i][(idx >> uint(i)) ^ 1])
 	}
-	return false
+	return path
 }
 
 func (m *MerkleTree) VerifyTx(tx transaction.Transaction) (bool, error) {
+	idx := 0
 	for _, n := range m.Leafs {
-		if n.tx == tx {
-			currentParent := n.Parent
-			for currentParent != nil {
+		if n == tx {
+			curHash := n.CalculateHash()
+			merklePath := m.MakeMerklePath(idx)
+			for _, siblingHash := range merklePath {
 				h := sha256.New()
-				h.Write(append(currentParent.Left.Hash, currentParent.Right.Hash...))
-				if bytes.Compare(h.Sum(nil), currentParent.Hash) != 0 {
-					return false, nil
-				}
-				currentParent = currentParent.Parent
+				hash := append(curHash, siblingHash...)
+				h.Write(hash)
+				curHash = h.Sum(nil)
 			}
-			return true, nil
+			if bytes.Equal(curHash, m.RootHash) {
+				return true, nil
+			}
+			return false, errors.New("Error: Tx is invalid")
 		}
+		idx++
 	}
 	return false, errors.New("Error: Tx is not exist")
 }
