@@ -10,5 +10,6 @@ type Validator interface{
 	ReBuildTree() error
 	VerifyTx(tx transaction.Transaction) (bool, error)
 	VerifyTree() bool
+	StoredTree(block block.Block) error
 }
 
