@@ -40,6 +40,7 @@ func (block *DefaultBlock) PutTransaction(transaction tx.Transaction) error {
 	default:
 		return InvalidTransactionTypeError
 	}
+
 	return nil
 }
 
@@ -67,8 +68,15 @@ func (block *DefaultBlock) GetHash() string {
 	return block.Header.BlockHash
 }
 
-func (block *DefaultBlock) GetTransactions() []*tx.Transaction {
-	return block.Transactions
+func (block *DefaultBlock) GetTransactions() []tx.Transaction {
+
+	txs := make([]tx.Transaction, 0)
+
+	for _, tx := range block.Transactions {
+		txs = append(txs, tx)
+	}
+
+	return txs
 }
 
 func (block *DefaultBlock) GetHeight() uint64 {
