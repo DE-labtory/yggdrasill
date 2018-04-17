@@ -8,6 +8,7 @@ import (
 
 	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill/block"
+	"github.com/it-chain/yggdrasill/transaction"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +26,9 @@ func TestYggDrasill_AddBlock(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	firstBlock := block.DefaultBlock{Header: block.BlockHeader{Height: 0, CreatorID: "test"}}
+	firstBlock := &block.DefaultBlock{Header: block.BlockHeader{Height: 0, CreatorID: "test"}}
+	tx := transaction.DefaultTransaction{TransactionID: "123"}
+	firstBlock.PutTransaction(tx)
 	err := y.AddBlock(firstBlock)
 	assert.NoError(t, err)
 
@@ -55,8 +58,8 @@ func TestYggDrasill_AddBlock2(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	block1 := block.DefaultBlock{Header: block.BlockHeader{Height: 0, CreatorID: "test"}}
-	block2 := block.DefaultBlock{Header: block.BlockHeader{Height: 2, CreatorID: "test"}}
+	block1 := &block.DefaultBlock{Header: block.BlockHeader{Height: 0, CreatorID: "test"}}
+	block2 := &block.DefaultBlock{Header: block.BlockHeader{Height: 2, CreatorID: "test"}}
 
 	err := y.AddBlock(block1)
 	assert.NoError(t, err)
@@ -80,7 +83,7 @@ func TestYggdrasil_GetBlockByNumber(t *testing.T) {
 	}()
 
 	for i := 0; i < 100; i++ {
-		tmpBlock := block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
+		tmpBlock := &block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
 		if i > 0 {
 			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
 		}
@@ -114,7 +117,7 @@ func TestYggdrasil_GetBlockByHash(t *testing.T) {
 	}()
 
 	for i := 0; i < 100; i++ {
-		tmpBlock := block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
+		tmpBlock := &block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
 		if i > 0 {
 			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
 		}
@@ -148,7 +151,7 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 	}()
 
 	for i := 0; i < 100; i++ {
-		tmpBlock := block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
+		tmpBlock := &block.DefaultBlock{Header: block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
 		if i > 0 {
 			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
 		}

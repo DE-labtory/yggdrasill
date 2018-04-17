@@ -1,5 +1,4 @@
 package validator
 
-type Validator interface{
-
+type Validator interface {
 }

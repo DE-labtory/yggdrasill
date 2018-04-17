@@ -15,7 +15,7 @@ import (
 type DefaultBlock struct {
 	Header       BlockHeader
 	MerkleTree   [][]string
-	Transactions []tx.Transaction
+	Transactions []*tx.DefaultTransaction
 }
 
 type BlockHeader struct {
@@ -31,10 +31,16 @@ type BlockHeader struct {
 	TransactionCount   int
 }
 
-func (block DefaultBlock) PutTransaction(transaction tx.Transaction) {
+func (block *DefaultBlock) PutTransaction(transaction tx.Transaction) error {
 
-	block.Transactions = append(block.Transactions, transaction)
-	block.Header.TransactionCount++
+	switch transaction.(type) {
+	case *tx.DefaultTransaction:
+		block.Transactions = append(block.Transactions, transaction.(*tx.DefaultTransaction))
+		block.Header.TransactionCount++
+	default:
+		return InvalidTransactionTypeError
+	}
+	return nil
 }
 
 func (block DefaultBlock) FindTransactionIndexByHash(txHash string) {
