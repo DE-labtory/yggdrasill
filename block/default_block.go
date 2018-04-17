@@ -13,7 +13,7 @@ import (
 )
 
 type DefaultBlock struct {
-	Header       BlockHeader
+	Header       *BlockHeader
 	MerkleTree   [][]string
 	Transactions []*tx.Transaction
 }
