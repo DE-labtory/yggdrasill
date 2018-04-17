@@ -15,7 +15,7 @@ import (
 type DefaultBlock struct {
 	Header       BlockHeader
 	MerkleTree   [][]string
-	Transactions []tx.Transaction
+	Transactions []*tx.Transaction
 }
 
 type BlockHeader struct {
@@ -31,7 +31,7 @@ type BlockHeader struct {
 	TransactionCount   int
 }
 
-func (block *DefaultBlock) PutTransaction(transaction tx.Transaction) {
+func (block *DefaultBlock) PutTransaction(transaction *tx.Transaction) {
 
 	block.Transactions = append(block.Transactions, transaction)
 	block.Header.TransactionCount++
@@ -61,7 +61,7 @@ func (block *DefaultBlock) GetHash() string {
 	return block.Header.BlockHash
 }
 
-func (block *DefaultBlock) GetTransactions() []tx.Transaction {
+func (block *DefaultBlock) GetTransactions() []*tx.Transaction {
 	return block.Transactions
 }
 
