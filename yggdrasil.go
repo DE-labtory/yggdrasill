@@ -34,6 +34,10 @@ func (y *Yggdrasil) Close() {
 	y.DBProvider.Close()
 }
 
+func (y *Yggdrasil) createGenesisBlock() {
+
+}
+
 func (y *Yggdrasil) AddBlock(block block.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 	lastBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
@@ -144,6 +148,7 @@ func (y *Yggdrasil) GetBlockByTxID(block block.Block, txid string) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
 	blockHash, err := utilDB.Get([]byte(txid))
+
 	if err != nil {
 		return err
 	}

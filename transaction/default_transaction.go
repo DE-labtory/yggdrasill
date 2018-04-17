@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"time"
+
 	"github.com/it-chain/yggdrasill/util"
 )
 
@@ -11,31 +12,27 @@ type TransactionType int
 type FunctionType string
 
 const (
-	Status_TRANSACTION_UNCONFIRMED	TransactionStatus	= 0
-	Status_TRANSACTION_CONFIRMED	TransactionStatus	= 1
-	Status_TRANSACTION_UNKNOWN		TransactionStatus	= 2
+	Status_TRANSACTION_UNCONFIRMED TransactionStatus = 0
+	Status_TRANSACTION_CONFIRMED   TransactionStatus = 1
+	Status_TRANSACTION_UNKNOWN     TransactionStatus = 2
 
 	Invoke TxDataType = "invoke"
-	Query TxDataType = "query"
+	Query  TxDataType = "query"
 
 	General TransactionType = 0 + iota
-
-	Write = "write"
-	Read = "read"
-	Delete = "delete"
 )
 
 type Params struct {
-	ParamsType	int
-	Function 	string
-	Args     	[]string
+	ParamsType int
+	Function   string
+	Args       []string
 }
 
 type TxData struct {
-	Jsonrpc		string
-	Method 		TxDataType
-	Params 		Params
-	ContractID	string
+	Jsonrpc string
+	Method  TxDataType
+	Params  Params
+	ID      string
 }
 
 type DefaultTransaction struct {
@@ -48,11 +45,11 @@ type DefaultTransaction struct {
 	TxData            *TxData
 }
 
-func (t DefaultTransaction) Serialize() ([]byte, error){
+func (t DefaultTransaction) Serialize() ([]byte, error) {
 	return util.Serialize(t)
 }
 
-func (t DefaultTransaction) GetID() string{
+func (t DefaultTransaction) GetID() string {
 	return t.TransactionID
 }
 

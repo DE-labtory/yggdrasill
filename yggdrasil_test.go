@@ -175,6 +175,7 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 
 func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 
+	//given
 	dbPath := "./.db"
 	opts := map[string]interface{}{
 		"db_path": dbPath,
@@ -186,10 +187,27 @@ func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
+
+	firstBlock := &block.DefaultBlock{Header: &block.BlockHeader{Height: 0, CreatorID: "test"}}
+	tx := &transaction.DefaultTransaction{TransactionID: "123"}
+	err := firstBlock.PutTransaction(tx)
+	assert.NoError(t, err)
+
+	err = y.AddBlock(firstBlock)
+	assert.NoError(t, err)
+
+	//when
+	retrievedTx := &transaction.DefaultTransaction{}
+	err = y.GetTransactionByTxID(retrievedTx, tx.TransactionID)
+	assert.NoError(t, err)
+
+	//then
+	assert.Equal(t, retrievedTx, tx)
 }
 
 func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 
+	//given
 	dbPath := "./.db"
 	opts := map[string]interface{}{
 		"db_path": dbPath,
@@ -201,4 +219,20 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
+
+	firstBlock := &block.DefaultBlock{Header: &block.BlockHeader{Height: 0, CreatorID: "test"}}
+	tx := &transaction.DefaultTransaction{TransactionID: "123"}
+	err := firstBlock.PutTransaction(tx)
+	assert.NoError(t, err)
+
+	err = y.AddBlock(firstBlock)
+	assert.NoError(t, err)
+
+	//when
+	retrievedBlock := &block.DefaultBlock{}
+	err = y.GetBlockByTxID(retrievedBlock, tx.TransactionID)
+	assert.NoError(t, err)
+
+	//then
+	assert.Equal(t, firstBlock, retrievedBlock)
 }
