@@ -13,7 +13,7 @@ import (
 )
 
 type DefaultBlock struct {
-	Header       BlockHeader
+	Header       *BlockHeader
 	MerkleTree   [][]string
 	Transactions []*tx.DefaultTransaction
 }
@@ -43,15 +43,15 @@ func (block *DefaultBlock) PutTransaction(transaction tx.Transaction) error {
 	return nil
 }
 
-func (block DefaultBlock) FindTransactionIndexByHash(txHash string) {
+func (block *DefaultBlock) FindTransactionIndexByHash(txHash string) {
 
 }
 
-func (block DefaultBlock) Serialize() ([]byte, error) {
+func (block *DefaultBlock) Serialize() ([]byte, error) {
 	return util.Serialize(block)
 }
 
-func (block DefaultBlock) GenerateHash() error {
+func (block *DefaultBlock) GenerateHash() error {
 
 	if block.Header.MerkleTreeRootHash == "" {
 		return errors.New("no merkle tree root hash")
@@ -63,19 +63,19 @@ func (block DefaultBlock) GenerateHash() error {
 	return nil
 }
 
-func (block DefaultBlock) GetHash() string {
+func (block *DefaultBlock) GetHash() string {
 	return block.Header.BlockHash
 }
 
-func (block DefaultBlock) GetTransactions() []tx.Transaction {
+func (block *DefaultBlock) GetTransactions() []*tx.Transaction {
 	return block.Transactions
 }
 
-func (block DefaultBlock) GetHeight() uint64 {
+func (block *DefaultBlock) GetHeight() uint64 {
 	return block.Header.Height
 }
 
-func (block DefaultBlock) IsPrev(serializedBlock []byte) bool {
+func (block *DefaultBlock) IsPrev(serializedBlock []byte) bool {
 	lastBlock := &DefaultBlock{}
 	err := util.Deserialize(serializedBlock, lastBlock)
 
