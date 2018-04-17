@@ -24,3 +24,7 @@ func (t *MerkleTree) ValidateTransaction(proof []byte, tx *tx.Transaction) bool 
 func (t *MerkleTree) GetProof() []byte {
 	return t.merkleRoot
 }
+
+func NewMerkleTree() (*MerkleTree, error) {
+	return nil, nil
+}
