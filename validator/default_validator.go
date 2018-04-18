@@ -26,6 +26,7 @@ func (t *MerkleTree) ValidateTransaction(proof []byte, tx *tx.Transaction) bool 
 	return false
 }
 
+// GetProof 함수는 MerkleTree의 루트 값을 반환함.
 func (t *MerkleTree) GetProof() []byte {
 	if len(t.data) == 0 || t.data[0] == nil {
 		return nil
