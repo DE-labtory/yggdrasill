@@ -117,7 +117,7 @@ func TestNewMerkleTree(t *testing.T) {
 }
 
 func TestMerkleTree_Serialize(t *testing.T) {
-	merkleTree, _ := createTestingMerkleTree(0)
+	_, merkleTree, _ := createTestingMerkleTree(0)
 	tests := []struct {
 		name string
 		t    *MerkleTree
@@ -143,7 +143,7 @@ func TestMerkleTree_Serialize(t *testing.T) {
 	}
 }
 
-func createTestingMerkleTree(index int) (*MerkleTree, error) {
+func createTestingMerkleTree(index int) ([]*tx.DefaultTransaction, *MerkleTree, error) {
 	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
 	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
 
@@ -224,5 +224,32 @@ func createTestingMerkleTree(index int) (*MerkleTree, error) {
 		},
 	}
 
-	return NewMerkleTree(testData[index])
+	merkleTree, error := NewMerkleTree(testData[index])
+
+	return testData[index], merkleTree, error
+}
+
+func TestMerkleTree_Validate(t *testing.T) {
+	testData, merkleTree, _ := createTestingMerkleTree(0)
+	convTestData := make([]tx.Transaction, 0)
+	for _, tx := range testData {
+		convTestData = append(convTestData, tx)
+	}
+
+	tests := []struct {
+		name string
+		want bool
+	}{
+		{
+			name: "Test correct validation",
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := merkleTree.Validate(convTestData); got != tt.want {
+				t.Errorf("MerkleTree.Validate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

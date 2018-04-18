@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	"strings"
 
 	tx "github.com/it-chain/yggdrasill/transaction"
@@ -19,27 +21,42 @@ type MerkleTree struct {
 	data [][]byte
 }
 
-// Validate 함수는 MerkleTree 전체를 검증함.
-func (t *MerkleTree) Validate() bool {
+// Validate 함수는 주어진 Transaction 리스트에 따라 MerkleTree 전체를 검증함.
+func (t *MerkleTree) Validate(txList []tx.Transaction) (bool, error) {
+	leafNodeIndex := 0
 	for i, n := range t.data {
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
 		if rightIndex >= len(t.data) {
 			// Check Leaf Node
-			// TODO: TxList가 필요.
+			tx, ok := txList[leafNodeIndex].(*tx.DefaultTransaction)
+			if ok {
+				calculatedHash, error := calculateLeafNodeHash(tx)
+				if error != nil {
+					return false, errors.New("Hash Calculation Failed Error")
+				}
+
+				if bytes.Compare(n, calculatedHash) != 0 {
+					fmt.Println(tx.TransactionID)
+					return false, nil
+				}
+			} else {
+				return false, errors.New("Type Conversion Failed Error")
+			}
+			leafNodeIndex++
 		} else {
 			// Check Intermediate Node
 			leftNode, rightNode := t.data[leftIndex], t.data[rightIndex]
 			calculatedHash := calculateIntermediateNodeHash(leftNode, rightNode)
 			if bytes.Compare(n, calculatedHash) != 0 {
-				return false
+				return false, nil
 			}
 		}
 	}
 
-	return true
+	return true, nil
 }
 
-func (t *MerkleTree) ValidateTransaction(proof []byte, tx *tx.Transaction) bool {
+func (t *MerkleTree) ValidateTransaction(proof []byte, tx tx.Transaction) bool {
 	return false
 }
 
