@@ -15,6 +15,9 @@ import (
 // SerializationJoinStr 상수는 Serialize()에서 배열을 구성하는 각 해시값들을 Join 할 때 쓰는 구분값
 const SerializationJoinStr = " "
 
+var TypeConversionFailedError = errors.New("Type Conversion Failed Error")
+var HashCalculationFailedError = errors.New("Hash Calculation Failed Error")
+
 // MerkleTree 객체는 Validator interface를 구현한 객체.
 // data 프로퍼티는 해시값([]byte)의 배열이다.
 type MerkleTree struct {
@@ -32,7 +35,7 @@ func (t *MerkleTree) Validate(txList []tx.Transaction) (bool, error) {
 			if ok {
 				calculatedHash, error := calculateLeafNodeHash(tx)
 				if error != nil {
-					return false, errors.New("Hash Calculation Failed Error")
+					return false, HashCalculationFailedError
 				}
 
 				if bytes.Compare(n, calculatedHash) != 0 {
@@ -40,7 +43,7 @@ func (t *MerkleTree) Validate(txList []tx.Transaction) (bool, error) {
 					return false, nil
 				}
 			} else {
-				return false, errors.New("Type Conversion Failed Error")
+				return false, TypeConversionFailedError
 			}
 			leafNodeIndex++
 		} else {
