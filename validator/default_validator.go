@@ -7,55 +7,40 @@ import (
 	"github.com/it-chain/yggdrasill/util"
 )
 
-type merkleNode struct {
-	Hash   []byte
-	Parent *merkleNode
-	Left   *merkleNode
-	Right  *merkleNode
-	IsLeaf bool
-	Tx     *tx.DefaultTransaction
-}
+type MerkleTree [][]byte
 
-type MerkleTree struct {
-	merkleRoot   []byte
-	root         *merkleNode
-	leafNodeList []*merkleNode
-}
-
-func (t *MerkleTree) Validate() bool {
+func (t MerkleTree) Validate() bool {
 	return false
 }
 
-func (t *MerkleTree) ValidateTransaction(proof []byte, tx *tx.Transaction) bool {
+func (t MerkleTree) ValidateTransaction(proof []byte, tx *tx.Transaction) bool {
 	return false
 }
 
-func (t *MerkleTree) GetProof() []byte {
-	return t.merkleRoot
+func (t MerkleTree) GetProof() []byte {
+	if len(t) == 0 {
+		return nil
+	}
+
+	return t[0]
 }
 
-func (t *MerkleTree) Serialize() string {
+func (t MerkleTree) Serialize() string {
 	return ""
 }
 
-func (t *MerkleTree) Deserialize(content string) {
+func (t MerkleTree) Deserialize(content string) {
 
 }
 
 // NewMerkleTree 는 DefaultTransaction 배열을 받아서 MerkleTree 객체를 생성하여 반환한다.
-func NewMerkleTree(txList []*tx.DefaultTransaction) (*MerkleTree, error) {
-	leafNodeList := make([]*merkleNode, 0)
+func NewMerkleTree(txList []*tx.DefaultTransaction) (MerkleTree, error) {
+	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
-		hashValue, error := calculateLeafNodeHash(tx)
+		leafNode, error := calculateLeafNodeHash(tx)
 		if error != nil {
 			return nil, error
-		}
-
-		leafNode := &merkleNode{
-			Hash:   hashValue,
-			Tx:     tx,
-			IsLeaf: true,
 		}
 
 		leafNodeList = append(leafNodeList, leafNode)
@@ -67,46 +52,28 @@ func NewMerkleTree(txList []*tx.DefaultTransaction) (*MerkleTree, error) {
 		leafNodeList = append(leafNodeList, leafNodeList[len(leafNodeList)-1])
 	}
 
-	rootNode, error := buildTree(leafNodeList)
-	if error != nil {
-		return nil, error
-	}
-
-	merkleTree := &MerkleTree{
-		merkleRoot:   rootNode.Hash,
-		root:         rootNode,
-		leafNodeList: leafNodeList,
-	}
-
-	return merkleTree, nil
+	return buildTree(leafNodeList, leafNodeList)
 }
 
-func buildTree(leafNodeList []*merkleNode) (*merkleNode, error) {
-	intermediateNodeList := make([]*merkleNode, 0)
+func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {
+	intermediateNodeList := make([][]byte, 0)
 
-	for i := 0; i < len(leafNodeList); i += 2 {
+	for i := 0; i < len(nodeList); i += 2 {
 		leftIndex, rightIndex := i, i+1
-		leftNode, rightNode := leafNodeList[leftIndex], leafNodeList[rightIndex]
+		leftNode, rightNode := nodeList[leftIndex], nodeList[rightIndex]
 
-		hashValue := calculateIntermediateNodeHash(leftNode.Hash, rightNode.Hash)
+		intermediateNode := calculateIntermediateNodeHash(leftNode, rightNode)
 
-		intermediateNode := &merkleNode{
-			Hash:   hashValue,
-			Left:   leftNode,
-			Right:  rightNode,
-			IsLeaf: false,
-		}
-
-		leftNode.Parent = intermediateNode
-		rightNode.Parent = intermediateNode
 		intermediateNodeList = append(intermediateNodeList, intermediateNode)
 
-		if len(leafNodeList) == 2 {
-			return intermediateNode, nil
+		if len(nodeList) == 2 {
+			return append(intermediateNodeList, fullNodeList...), nil
 		}
 	}
 
-	return buildTree(intermediateNodeList)
+	newFullNodeList := append(intermediateNodeList, fullNodeList...)
+
+	return buildTree(intermediateNodeList, newFullNodeList)
 }
 
 func calculateLeafNodeHash(tx *tx.DefaultTransaction) ([]byte, error) {

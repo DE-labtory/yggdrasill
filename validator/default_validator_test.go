@@ -109,7 +109,7 @@ func TestNewMerkleTree(t *testing.T) {
 				t.Errorf("NewMerkleTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if bytes.Compare(got.merkleRoot, tt.wantRootHash) != 0 {
+			if bytes.Compare(got[0], tt.wantRootHash) != 0 {
 				t.Errorf("NewMerkleTree() = %v, want %v", got, tt.wantRootHash)
 			}
 		})
