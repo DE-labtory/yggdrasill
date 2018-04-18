@@ -35,26 +35,26 @@ func (t *MerkleTree) GetProof() []byte {
 }
 
 // Serialize 함수는 MerkleTree를 구성하는 각 노드(해시값)를 1차원 string 배열로 만든 후,
-// 이를 다시 하나의 string 값으로 join 하여 반환함.
+// 이를 다시 하나의 string 값으로 join 한 후, []byte로 변환하여 반환함.
 // 이 반환값이 Block에 저장됨.
-func (t *MerkleTree) Serialize() string {
+func (t *MerkleTree) Serialize() []byte {
 	convStrArr := make([]string, 0)
 	for _, byteArr := range t.data {
-		// n := bytes.IndexByte(byteArr, 0)
 		s := hex.EncodeToString(byteArr)
 		convStrArr = append(convStrArr, s)
 	}
 
-	return strings.Join(convStrArr, SerializationJoinStr)
+	return []byte(strings.Join(convStrArr, SerializationJoinStr))
 }
 
 // Deserialize 함수는 Serialize() 함수를 통해 변환되었던 string 값을 다시 [][]byte 값으로 변환한 후,
 // 이를 MerkleTree 객체의 data 프로퍼티에 할당함.
-func (t *MerkleTree) Deserialize(content string) error {
-	strArr := strings.Fields(content)
+func (t *MerkleTree) Deserialize(serialized []byte) error {
 	if t.data == nil {
 		t.data = make([][]byte, 0)
 	}
+
+	strArr := strings.Fields(string(serialized[:]))
 
 	for _, str := range strArr {
 		bArr, error := hex.DecodeString(str)

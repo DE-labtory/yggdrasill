@@ -8,6 +8,6 @@ type Validator interface {
 	Validate() bool
 	ValidateTransaction(proof []byte, tx *tx.Transaction) bool
 	GetProof() []byte
-	Serialize() string
-	Deserialize(content string) error
+	Serialize() []byte
+	Deserialize(serialized []byte) error
 }
