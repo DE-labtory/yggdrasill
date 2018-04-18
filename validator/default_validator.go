@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"strings"
@@ -18,8 +19,24 @@ type MerkleTree struct {
 	data [][]byte
 }
 
+// Validate 함수는 MerkleTree 전체를 검증함.
 func (t *MerkleTree) Validate() bool {
-	return false
+	for i, n := range t.data {
+		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
+		if rightIndex >= len(t.data) {
+			// Check Leaf Node
+			// TODO: TxList가 필요.
+		} else {
+			// Check Intermediate Node
+			leftNode, rightNode := t.data[leftIndex], t.data[rightIndex]
+			calculatedHash := calculateIntermediateNodeHash(leftNode, rightNode)
+			if bytes.Compare(n, calculatedHash) != 0 {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func (t *MerkleTree) ValidateTransaction(proof []byte, tx *tx.Transaction) bool {
