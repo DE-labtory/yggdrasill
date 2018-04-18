@@ -247,7 +247,7 @@ func TestMerkleTree_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := merkleTree.Validate(convTestData); got != tt.want {
+			if got, _ := merkleTree.Validate(convTestData); got != tt.want {
 				t.Errorf("MerkleTree.Validate() = %v, want %v", got, tt.want)
 			}
 		})
