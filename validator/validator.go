@@ -9,5 +9,5 @@ type Validator interface {
 	ValidateTransaction(proof []byte, tx *tx.Transaction) bool
 	GetProof() []byte
 	Serialize() string
-	Deserialize(content string)
+	Deserialize(content string) error
 }

@@ -2,39 +2,73 @@ package validator
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
+	"strings"
 
 	tx "github.com/it-chain/yggdrasill/transaction"
 	"github.com/it-chain/yggdrasill/util"
 )
 
-type MerkleTree [][]byte
+const SerializationJoinStr = " "
 
-func (t MerkleTree) Validate() bool {
+type MerkleTree struct {
+	data [][]byte
+}
+
+// type MerkleTree [][]byte
+
+func (t *MerkleTree) Validate() bool {
 	return false
 }
 
-func (t MerkleTree) ValidateTransaction(proof []byte, tx *tx.Transaction) bool {
+func (t *MerkleTree) ValidateTransaction(proof []byte, tx *tx.Transaction) bool {
 	return false
 }
 
-func (t MerkleTree) GetProof() []byte {
-	if len(t) == 0 {
+func (t *MerkleTree) GetProof() []byte {
+	if len(t.data) == 0 || t.data[0] == nil {
 		return nil
 	}
 
-	return t[0]
+	return t.data[0]
 }
 
-func (t MerkleTree) Serialize() string {
-	return ""
+// Serialize 함수는 MerkleTree를 구성하는 각 노드(해시값)를 1차원 string 배열로 만든 후,
+// 이를 다시 하나의 string 값으로 join 하여 반환함.
+// 이 반환값이 Block에 저장됨.
+func (t *MerkleTree) Serialize() string {
+	convStrArr := make([]string, 0)
+	for _, byteArr := range t.data {
+		// n := bytes.IndexByte(byteArr, 0)
+		s := hex.EncodeToString(byteArr)
+		convStrArr = append(convStrArr, s)
+	}
+
+	return strings.Join(convStrArr, SerializationJoinStr)
 }
 
-func (t MerkleTree) Deserialize(content string) {
+// Deserialize 함수는 Serialize() 함수를 통해 변환되었던 string 값을 다시 [][]byte 값으로 변환한 후,
+// 이를 MerkleTree 객체의 data 프로퍼티에 할당함.
+func (t *MerkleTree) Deserialize(content string) error {
+	strArr := strings.Fields(content)
+	if t.data == nil {
+		t.data = make([][]byte, 0)
+	}
 
+	for _, str := range strArr {
+		bArr, error := hex.DecodeString(str)
+		if error != nil {
+			return error
+		}
+
+		t.data = append(t.data, bArr)
+	}
+
+	return nil
 }
 
 // NewMerkleTree 는 DefaultTransaction 배열을 받아서 MerkleTree 객체를 생성하여 반환한다.
-func NewMerkleTree(txList []*tx.DefaultTransaction) (MerkleTree, error) {
+func NewMerkleTree(txList []*tx.DefaultTransaction) (*MerkleTree, error) {
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
@@ -52,7 +86,12 @@ func NewMerkleTree(txList []*tx.DefaultTransaction) (MerkleTree, error) {
 		leafNodeList = append(leafNodeList, leafNodeList[len(leafNodeList)-1])
 	}
 
-	return buildTree(leafNodeList, leafNodeList)
+	tree, error := buildTree(leafNodeList, leafNodeList)
+	if error != nil {
+		return nil, error
+	}
+
+	return &MerkleTree{data: tree}, nil
 }
 
 func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {
