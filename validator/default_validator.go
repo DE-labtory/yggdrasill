@@ -34,6 +34,14 @@ func (t *MerkleTree) GetProof() []byte {
 	return t.merkleRoot
 }
 
+func (t *MerkleTree) Serialize() string {
+	return ""
+}
+
+func (t *MerkleTree) Deserialize(content string) {
+
+}
+
 // NewMerkleTree 는 DefaultTransaction 배열을 받아서 MerkleTree 객체를 생성하여 반환한다.
 func NewMerkleTree(txList []*tx.DefaultTransaction) (*MerkleTree, error) {
 	leafNodeList := make([]*merkleNode, 0)
