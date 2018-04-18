@@ -14,7 +14,7 @@ import (
 
 type DefaultBlock struct {
 	Header       *BlockHeader
-	MerkleTree   [][]string
+	MerkleTree   []byte
 	Transactions []*tx.DefaultTransaction
 }
 
