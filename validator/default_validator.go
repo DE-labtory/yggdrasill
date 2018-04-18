@@ -9,13 +9,14 @@ import (
 	"github.com/it-chain/yggdrasill/util"
 )
 
+// SerializationJoinStr 상수는 Serialize()에서 배열을 구성하는 각 해시값들을 Join 할 때 쓰는 구분값
 const SerializationJoinStr = " "
 
+// MerkleTree 객체는 Validator interface를 구현한 객체.
+// data 프로퍼티는 해시값([]byte)의 배열이다.
 type MerkleTree struct {
 	data [][]byte
 }
-
-// type MerkleTree [][]byte
 
 func (t *MerkleTree) Validate() bool {
 	return false
