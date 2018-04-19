@@ -1,7 +1,6 @@
 package transaction
 
-//interface에 맞춰 설계
-//interface를 implement하는 모든 custom Transaction 사용 가능하게 구현.
+// Transaction interface는 it-chain에서 사용되는 모든 Transaction이 공통적으로 가져야 하는 함수들을 정의함.
 type Transaction interface {
 	Serialize() ([]byte, error)
 	GetID() string
