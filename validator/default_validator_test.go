@@ -104,7 +104,8 @@ func TestNewMerkleTree(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewMerkleTree(tt.args.txList)
+
+			got, err := NewMerkleTree(convertType(tt.args.txList))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewMerkleTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -138,6 +139,82 @@ func TestMerkleTree_Serialize(t *testing.T) {
 				if bytes.Compare(bArr, tt.t.data[i]) != 0 {
 					t.Errorf("Expected = %v, but Actual = %v", tt.t.data[i], bArr)
 				}
+			}
+		})
+	}
+}
+
+func TestMerkleTree_Validate(t *testing.T) {
+	testData, merkleTree, _ := createTestingMerkleTree(0)
+	convTestData := make([]tx.Transaction, 0)
+	for _, tx := range testData {
+		convTestData = append(convTestData, tx)
+	}
+
+	tests := []struct {
+		name string
+		want bool
+	}{
+		{
+			name: "Test correct validation",
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, _ := merkleTree.Validate(convTestData); got != tt.want {
+				t.Errorf("MerkleTree.Validate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMerkleTree_ValidateTransaction(t *testing.T) {
+	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
+	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
+	testData, merkleTree, _ := createTestingMerkleTree(0)
+	convTestData := make([]tx.Transaction, 0)
+	for _, tx := range testData {
+		convTestData = append(convTestData, tx)
+	}
+
+	tests := []struct {
+		name string
+		t    *tx.DefaultTransaction
+		want bool
+	}{
+		{
+			name: "Test true ValidationTransaction",
+			t:    testData[1],
+			want: true,
+		},
+		{
+			name: "Test false ValidationTransaction",
+			t: &tx.DefaultTransaction{
+				InvokePeerID:      "p05",
+				TransactionID:     "tx05",
+				TransactionStatus: 0,
+				TransactionType:   0,
+				TransactionHash:   "hashValue",
+				TimeStamp:         testingTime,
+				TxData: &tx.TxData{
+					Jsonrpc: "jsonRPC05",
+					Method:  "invoke",
+					Params: tx.Params{
+						ParamsType: 0,
+						Function:   "function05",
+						Args:       []string{"arg1", "arg2"},
+					},
+					ID: "txdata05",
+				},
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, _ := merkleTree.ValidateTransaction(merkleTree.GetProof(), tt.t); got != tt.want {
+				t.Errorf("MerkleTree.ValidateTransaction() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -224,83 +301,16 @@ func createTestingMerkleTree(index int) ([]*tx.DefaultTransaction, *MerkleTree, 
 		},
 	}
 
-	merkleTree, error := NewMerkleTree(testData[index])
+	merkleTree, error := NewMerkleTree(convertType(testData[index]))
 
 	return testData[index], merkleTree, error
 }
 
-func TestMerkleTree_Validate(t *testing.T) {
-	testData, merkleTree, _ := createTestingMerkleTree(0)
-	convTestData := make([]tx.Transaction, 0)
-	for _, tx := range testData {
-		convTestData = append(convTestData, tx)
+func convertType(txList []*tx.DefaultTransaction) []tx.Transaction {
+	convTxList := make([]tx.Transaction, 0)
+	for _, tx := range txList {
+		convTxList = append(convTxList, tx)
 	}
 
-	tests := []struct {
-		name string
-		want bool
-	}{
-		{
-			name: "Test correct validation",
-			want: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := merkleTree.Validate(convTestData); got != tt.want {
-				t.Errorf("MerkleTree.Validate() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestMerkleTree_ValidateTransaction(t *testing.T) {
-	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
-	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
-	testData, merkleTree, _ := createTestingMerkleTree(0)
-	convTestData := make([]tx.Transaction, 0)
-	for _, tx := range testData {
-		convTestData = append(convTestData, tx)
-	}
-
-	tests := []struct {
-		name string
-		t    *tx.DefaultTransaction
-		want bool
-	}{
-		{
-			name: "Test true ValidationTransaction",
-			t:    testData[1],
-			want: true,
-		},
-		{
-			name: "Test false ValidationTransaction",
-			t: &tx.DefaultTransaction{
-				InvokePeerID:      "p05",
-				TransactionID:     "tx05",
-				TransactionStatus: 0,
-				TransactionType:   0,
-				TransactionHash:   "hashValue",
-				TimeStamp:         testingTime,
-				TxData: &tx.TxData{
-					Jsonrpc: "jsonRPC05",
-					Method:  "invoke",
-					Params: tx.Params{
-						ParamsType: 0,
-						Function:   "function05",
-						Args:       []string{"arg1", "arg2"},
-					},
-					ID: "txdata05",
-				},
-			},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := merkleTree.ValidateTransaction(merkleTree.GetProof(), tt.t); got != tt.want {
-				t.Errorf("MerkleTree.ValidateTransaction() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	return convTxList
 }

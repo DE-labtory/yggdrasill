@@ -31,19 +31,13 @@ func (t *MerkleTree) Validate(txList []tx.Transaction) (bool, error) {
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
 		if rightIndex >= len(t.data) {
 			// Check Leaf Node
-			tx, ok := txList[leafNodeIndex].(*tx.DefaultTransaction)
-			if ok {
-				calculatedHash, error := calculateLeafNodeHash(tx)
-				if error != nil {
-					return false, HashCalculationFailedError
-				}
+			calculatedHash, error := txList[leafNodeIndex].CalculateHash()
+			if error != nil {
+				return false, ErrHashCalculationFailed
+			}
 
-				if bytes.Compare(n, calculatedHash) != 0 {
-					fmt.Println(tx.TransactionID)
-					return false, nil
-				}
-			} else {
-				return false, TypeConversionFailedError
+			if bytes.Compare(n, calculatedHash) != 0 {
+				return false, nil
 			}
 			leafNodeIndex++
 		} else {
@@ -60,13 +54,8 @@ func (t *MerkleTree) Validate(txList []tx.Transaction) (bool, error) {
 }
 
 // ValidateTransaction 함수는 주어진 Transaction이 이 merkletree에 올바로 있는지를 확인한다.
-func (t *MerkleTree) ValidateTransaction(proof []byte, transaction tx.Transaction) (bool, error) {
-	tx, ok := transaction.(*tx.DefaultTransaction)
-	if !ok {
-		return false, TypeConversionFailedError
-	}
-
-	hash, error := calculateLeafNodeHash(tx)
+func (t *MerkleTree) ValidateTransaction(proof []byte, tx tx.Transaction) (bool, error) {
+	hash, error := tx.CalculateHash()
 	if error != nil {
 		return false, error
 	}
@@ -156,11 +145,11 @@ func (t *MerkleTree) Deserialize(serialized []byte) error {
 }
 
 // NewMerkleTree 는 DefaultTransaction 배열을 받아서 MerkleTree 객체를 생성하여 반환한다.
-func NewMerkleTree(txList []*tx.DefaultTransaction) (*MerkleTree, error) {
+func NewMerkleTree(txList []tx.Transaction) (*MerkleTree, error) {
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
-		leafNode, error := calculateLeafNodeHash(tx)
+		leafNode, error := tx.CalculateHash()
 		if error != nil {
 			return nil, error
 		}
@@ -201,15 +190,6 @@ func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {
 	newFullNodeList := append(intermediateNodeList, fullNodeList...)
 
 	return buildTree(intermediateNodeList, newFullNodeList)
-}
-
-func calculateLeafNodeHash(tx *tx.DefaultTransaction) ([]byte, error) {
-	serializedTx, error := util.Serialize(tx)
-	if error != nil {
-		return nil, error
-	}
-
-	return calculateHash(serializedTx), nil
 }
 
 func calculateIntermediateNodeHash(leftHash []byte, rightHash []byte) []byte {
