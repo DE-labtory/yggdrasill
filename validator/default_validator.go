@@ -5,18 +5,16 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"strings"
 
 	tx "github.com/it-chain/yggdrasill/transaction"
-	"github.com/it-chain/yggdrasill/util"
 )
 
 // SerializationJoinStr 상수는 Serialize()에서 배열을 구성하는 각 해시값들을 Join 할 때 쓰는 구분값
 const SerializationJoinStr = " "
 
-var TypeConversionFailedError = errors.New("Type Conversion Failed Error")
-var HashCalculationFailedError = errors.New("Hash Calculation Failed Error")
+// ErrHashCalculationFailed 변수는 Hash 계산 중 발생한 에러를 정의한다.
+var ErrHashCalculationFailed = errors.New("Hash Calculation Failed Error")
 
 // MerkleTree 객체는 Validator interface를 구현한 객체.
 // data 프로퍼티는 해시값([]byte)의 배열이다.
