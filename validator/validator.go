@@ -6,7 +6,7 @@ import tx "github.com/it-chain/yggdrasill/transaction"
 // Default 구현체는 Merkle Tree이다.
 type Validator interface {
 	Validate(txList []tx.Transaction) (bool, error)
-	ValidateTransaction(proof []byte, tx tx.Transaction) bool
+	ValidateTransaction(proof []byte, transaction tx.Transaction) bool
 	GetProof() []byte
 	Serialize() []byte
 	Deserialize(serialized []byte) error

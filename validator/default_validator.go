@@ -60,8 +60,56 @@ func (t *MerkleTree) Validate(txList []tx.Transaction) (bool, error) {
 }
 
 // ValidateTransaction 함수는 주어진 Transaction이 이 merkletree에 올바로 있는지를 확인한다.
-func (t *MerkleTree) ValidateTransaction(proof []byte, tx tx.Transaction) bool {
-	return false
+func (t *MerkleTree) ValidateTransaction(proof []byte, transaction tx.Transaction) (bool, error) {
+	tx, ok := transaction.(*tx.DefaultTransaction)
+	if !ok {
+		return false, TypeConversionFailedError
+	}
+
+	hash, error := calculateLeafNodeHash(tx)
+	if error != nil {
+		return false, error
+	}
+
+	index := -1
+	for i, h := range t.data {
+		if bytes.Compare(h, hash) == 0 {
+			index = i
+		}
+	}
+
+	if index == -1 {
+		return false, nil
+	}
+
+	var siblingIndex, parentIndex int
+	for index > 0 {
+		var isLeft bool
+		if index%2 == 0 {
+			siblingIndex = index - 1
+			parentIndex = (index - 1) / 2
+			isLeft = false
+		} else {
+			siblingIndex = index + 1
+			parentIndex = index / 2
+			isLeft = true
+		}
+
+		var parentHash []byte
+		if isLeft {
+			parentHash = calculateIntermediateNodeHash(t.data[index], t.data[siblingIndex])
+		} else {
+			parentHash = calculateIntermediateNodeHash(t.data[siblingIndex], t.data[index])
+		}
+
+		if bytes.Compare(parentHash, t.data[parentIndex]) != 0 {
+			return false, nil
+		}
+
+		index = parentIndex
+	}
+
+	return true, nil
 }
 
 // GetProof 함수는 MerkleTree의 루트 값을 반환함.

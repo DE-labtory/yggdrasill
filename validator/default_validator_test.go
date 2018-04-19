@@ -253,3 +253,54 @@ func TestMerkleTree_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestMerkleTree_ValidateTransaction(t *testing.T) {
+	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
+	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
+	testData, merkleTree, _ := createTestingMerkleTree(0)
+	convTestData := make([]tx.Transaction, 0)
+	for _, tx := range testData {
+		convTestData = append(convTestData, tx)
+	}
+
+	tests := []struct {
+		name string
+		t    *tx.DefaultTransaction
+		want bool
+	}{
+		{
+			name: "Test true ValidationTransaction",
+			t:    testData[1],
+			want: true,
+		},
+		{
+			name: "Test false ValidationTransaction",
+			t: &tx.DefaultTransaction{
+				InvokePeerID:      "p05",
+				TransactionID:     "tx05",
+				TransactionStatus: 0,
+				TransactionType:   0,
+				TransactionHash:   "hashValue",
+				TimeStamp:         testingTime,
+				TxData: &tx.TxData{
+					Jsonrpc: "jsonRPC05",
+					Method:  "invoke",
+					Params: tx.Params{
+						ParamsType: 0,
+						Function:   "function05",
+						Args:       []string{"arg1", "arg2"},
+					},
+					ID: "txdata05",
+				},
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, _ := merkleTree.ValidateTransaction(merkleTree.GetProof(), tt.t); got != tt.want {
+				t.Errorf("MerkleTree.ValidateTransaction() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
