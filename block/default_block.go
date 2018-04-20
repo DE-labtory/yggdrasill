@@ -7,9 +7,9 @@ import (
 	"sort"
 	"strings"
 	"time"
-
 	tx "github.com/it-chain/yggdrasill/transaction"
 	"github.com/it-chain/yggdrasill/util"
+	//"strconv"
 )
 
 type DefaultBlock struct {
@@ -82,27 +82,35 @@ func computeSHA256(data []string) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-//
-//func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
-//
-//	var header BlockHeader
-//	if prevBlock == nil{
-//		header.Number = 0
-//		header.PreviousHash = ""
-//		header.Version = ""
-//		header.BlockHeight = 0
-//	} else {
-//		header.Number = prevBlock.Header.Number + 1
-//		header.PreviousHash = prevBlock.Header.BlockHash
-//		header.Version = prevBlock.Header.Version
-//		header.BlockHeight = prevBlock.Header.BlockHeight + 1
-//	}
-//	header.CreatedPeerID = createPeerId
-//	header.TimeStamp = time.Now().Round(0)
-//	header.BlockStatus = Status_BLOCK_UNCONFIRMED
-//
-//	return &Block{Header:&header, MerkleTree:make([][]string, 0), MerkleTreeHeight:0, TransactionCount:0, Transactions:make([]*Transaction, 0)}
-//}
+
+func CreateNewBlock(prevBlock *DefaultBlock, createPeerId string) (*DefaultBlock, error){
+	var header BlockHeader
+
+	if createPeerId == ""{
+		return &DefaultBlock{}, errors.New("You have to put createPeerId")
+	}
+
+	if prevBlock == nil{
+		header.Height = 0
+		header.PreviousHash = ""
+		header.Version = ""
+
+	} else {
+		header.Height = prevBlock.Header.Height + 1
+		header.PreviousHash = prevBlock.Header.BlockHash
+		header.Version = prevBlock.Header.Version
+
+	}
+	header.CreatorID = createPeerId
+	header.MerkleTreeHeight = 0
+	header.TimeStamp = time.Now().Round(0)
+	header.TransactionCount = 0
+	header.MerkleTreeRootHash = ""
+	header.BlockHash = ""
+	//header.Signature =
+
+	return &DefaultBlock{Header:&header, MerkleTree:make([][]string, 0), Transactions:make([]*tx.Transaction, 0)}, nil
+}
 //
 //func (s *Block) PutTranscation(tx *transaction.Transaction) error{
 //
