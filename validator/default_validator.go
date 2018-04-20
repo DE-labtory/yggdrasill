@@ -52,7 +52,7 @@ func (t *MerkleTree) Validate(txList []tx.Transaction) (bool, error) {
 }
 
 // ValidateTransaction 함수는 주어진 Transaction이 이 merkletree에 올바로 있는지를 확인한다.
-func (t *MerkleTree) ValidateTransaction(proof []byte, tx tx.Transaction) (bool, error) {
+func (t *MerkleTree) ValidateTransaction(tx tx.Transaction) (bool, error) {
 	hash, error := tx.CalculateHash()
 	if error != nil {
 		return false, error

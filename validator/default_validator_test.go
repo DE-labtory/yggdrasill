@@ -131,7 +131,7 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := merkleTree.ValidateTransaction(merkleTree.GetProof(), tt.t); got != tt.want {
+			if got, _ := merkleTree.ValidateTransaction(tt.t); got != tt.want {
 				t.Errorf("MerkleTree.ValidateTransaction() = %v, want %v", got, tt.want)
 			}
 		})
