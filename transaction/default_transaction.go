@@ -90,17 +90,7 @@ func calculateHash(b []byte) []byte {
 	return hashValue.Sum(nil)
 }
 
-//func CreateNewTransaction(peer_id string, tx_id string, tx_type Type, t time.Time, data *TxData) *Transaction{
-//
-//	transaction := &Transaction{PeerID:peer_id, ID:tx_id, Status:Status_TRANSACTION_UNKNOWN, Type:tx_type, Timestamp:t, TxData:data}
-//
-//	return transaction
-//}
-//
-//func SetTxMethodParameters(params_type int, function string, args []string) Params{
-//	return Params{params_type, function, args}
-//}
-//
-//func SetTxData(jsonrpc string, method TxDataType, params Params, contract_id string) *TxData{
-//	return &TxData{jsonrpc, method, params, contract_id}
-//}
+// NewDefaultTransaction 함수는 새로운 DefaultTransaction를 반환한다.
+func NewDefaultTransaction() *DefaultTransaction {
+	return nil
+}
