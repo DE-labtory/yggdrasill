@@ -17,7 +17,7 @@ var ErrHashCalculationFailed = errors.New("Hash Calculation Failed Error")
 // MerkleTree 객체는 Validator interface를 구현한 객체.
 type MerkleTree struct{}
 
-// Validate 함수는 주어진 Transaction 리스트에 따라 MerkleTree 전체를 검증함.
+// Validate 함수는 주어진 Transaction 리스트에 따라 주어진 MerkleTree 전체(proof)를 검증함.
 func (t *MerkleTree) Validate(proof [][]byte, txList []tx.Transaction) (bool, error) {
 	leafNodeIndex := 0
 	for i, n := range proof {
@@ -46,7 +46,7 @@ func (t *MerkleTree) Validate(proof [][]byte, txList []tx.Transaction) (bool, er
 	return true, nil
 }
 
-// ValidateTransaction 함수는 주어진 Transaction이 이 merkletree에 올바로 있는지를 확인한다.
+// ValidateTransaction 함수는 주어진 Transaction이 이 merkletree(proof)에 올바로 있는지를 확인한다.
 func (t *MerkleTree) ValidateTransaction(proof [][]byte, tx tx.Transaction) (bool, error) {
 	hash, error := tx.CalculateHash()
 	if error != nil {
