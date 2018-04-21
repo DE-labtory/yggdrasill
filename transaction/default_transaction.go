@@ -14,6 +14,7 @@ type Status int
 type TxDataType string
 
 // FunctionType 은 ...
+// TODO: FunctionType 타입에 대한 상수값들이 없음
 type FunctionType string
 
 // Transaction의 Status를 정의하는 상수들
