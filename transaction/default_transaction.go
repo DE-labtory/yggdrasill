@@ -13,30 +13,20 @@ type Status int
 // TxDataType 변수는 Transaction의 함수가 invoke인지 query인지 표현한다.
 type TxDataType string
 
-// Type 은 현재 General 타입만 존재한다.
-type Type int
-
 // FunctionType 은 ...
 type FunctionType string
 
 // Transaction의 Status를 정의하는 상수들
 // TODO: 필요한 것인지 논의가 필요함.
 const (
-	StatusTransactionUnconfirmed Status = 0
-	StatusTransactionConfirmed   Status = 1
-	StatusTransactionUnknown     Status = 2
+	StatusTransactionInvalid Status = 0
+	StatusTransactionValid   Status = 1
 )
 
 // TxData의 Type을 정의하는 상수들
 const (
 	Invoke TxDataType = "invoke"
 	Query  TxDataType = "query"
-)
-
-// Transaction의 Type을 정의하는 상수
-// TODO: 필요한 것인지 논의가 필요함.
-const (
-	General Type = 0 + iota
 )
 
 // Params 구조체는 Jsonrpc에서 invoke하는 함수의 패러미터를 정의한다.
@@ -58,7 +48,6 @@ type TxData struct {
 type DefaultTransaction struct {
 	ID        string
 	Status    Status
-	Type      Type
 	PeerID    string
 	Timestamp time.Time
 	TxData    *TxData
