@@ -1,0 +1,16 @@
+{
+  "Header": {
+              "Height":0,
+              "PreviousHash":"",
+              "Version":"",
+              "MerkleTreeRootHash":"",
+              "TimeStamp":"0001-01-01T00:00:00-00:00",
+              "CreatorID":"Genesis",
+              "Signature":[],
+              "BlockHash":"",
+              "MerkleTreeHeight":0,
+              "TransactionCount":0
+            },
+  "MerkleTree": [],
+  "Transactions":[]
+}

@@ -4,14 +4,16 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-
+	"os"
 	"sort"
 	"strings"
 	"time"
 
+	"encoding/json"
+	"io/ioutil"
+
 	tx "github.com/it-chain/yggdrasill/transaction"
 	"github.com/it-chain/yggdrasill/util"
-	//"strconv"
 )
 
 type DefaultBlock struct {
@@ -21,16 +23,16 @@ type DefaultBlock struct {
 }
 
 type BlockHeader struct {
-	Height             uint64
-	PreviousHash       string
-	Version            string
-	MerkleTreeRootHash string
-	TimeStamp          time.Time
-	CreatorID          string
-	Signature          []byte
-	BlockHash          string
-	MerkleTreeHeight   int
-	TransactionCount   int
+	Height             uint64    `json:"Height"`
+	PreviousHash       string    `json:"PreviousHash"`
+	Version            string    `json:"Version"`
+	MerkleTreeRootHash string    `json:"MerkleTreeRootHash"`
+	TimeStamp          time.Time `json:"TimeStamp"`
+	CreatorID          string    `json:"CreatorID"`
+	Signature          []byte    `json:"Signature"`
+	BlockHash          string    `json:"BlockHash"`
+	MerkleTreeHeight   int       `json:"MerkleTreeHeight"`
+	TransactionCount   int       `json:"TransactionCount"`
 }
 
 func (block *DefaultBlock) PutTransaction(transaction *tx.Transaction) {
@@ -53,7 +55,7 @@ func (block *DefaultBlock) GenerateHash() error {
 		return errors.New("no merkle tree root hash")
 	}
 
-	str := []string{block.Header.MerkleTreeRootHash, block.Header.TimeStamp.String(), block.Header.PreviousHash}
+	str := []string{block.Header.MerkleTreeRootHash, block.Header.PreviousHash}
 	block.Header.BlockHash = computeSHA256(str)
 
 	return nil
@@ -104,13 +106,40 @@ func CreateNewBlock(prevBlock *DefaultBlock, createPeerId string) (*DefaultBlock
 	}
 	header.CreatorID = createPeerId
 	header.MerkleTreeHeight = 0
-	header.TimeStamp = time.Now().Round(0)
+	header.TimeStamp = time.Now()
 	header.TransactionCount = 0
 	header.MerkleTreeRootHash = ""
 	header.BlockHash = ""
-	//header.Signature =
+	header.Signature = make([]uint8, 0)
 
 	return &DefaultBlock{Header: &header, MerkleTree: make([][]string, 0), Transactions: make([]*tx.Transaction, 0)}, nil
+}
+
+func CreateGenesisBlock() (*DefaultBlock, error) {
+	byteValue, err := ConfigFromJson("GenesisBlockConfig.json")
+	if err != nil {
+		return nil, err
+	}
+
+	var GenesisBlock *DefaultBlock
+	json.Unmarshal(byteValue, &GenesisBlock)
+	GenesisBlock.Header.TimeStamp = time.Now()
+	return GenesisBlock, nil
+}
+
+func ConfigFromJson(filename string) ([]uint8, error) {
+	folderpath := "../config/"
+	jsonFile, err := os.Open(folderpath + filename)
+	defer jsonFile.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return nil, err
+	}
+	return byteValue, nil
 }
 
 //
