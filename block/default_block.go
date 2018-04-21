@@ -4,9 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+
 	"sort"
 	"strings"
 	"time"
+
 	tx "github.com/it-chain/yggdrasill/transaction"
 	"github.com/it-chain/yggdrasill/util"
 	//"strconv"
@@ -82,15 +84,14 @@ func computeSHA256(data []string) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-
-func CreateNewBlock(prevBlock *DefaultBlock, createPeerId string) (*DefaultBlock, error){
+func CreateNewBlock(prevBlock *DefaultBlock, createPeerId string) (*DefaultBlock, error) {
 	var header BlockHeader
 
-	if createPeerId == ""{
+	if createPeerId == "" {
 		return &DefaultBlock{}, errors.New("You have to put createPeerId")
 	}
 
-	if prevBlock == nil{
+	if prevBlock == nil {
 		header.Height = 0
 		header.PreviousHash = ""
 		header.Version = ""
@@ -109,8 +110,9 @@ func CreateNewBlock(prevBlock *DefaultBlock, createPeerId string) (*DefaultBlock
 	header.BlockHash = ""
 	//header.Signature =
 
-	return &DefaultBlock{Header:&header, MerkleTree:make([][]string, 0), Transactions:make([]*tx.Transaction, 0)}, nil
+	return &DefaultBlock{Header: &header, MerkleTree: make([][]string, 0), Transactions: make([]*tx.Transaction, 0)}, nil
 }
+
 //
 //func (s *Block) PutTranscation(tx *transaction.Transaction) error{
 //
