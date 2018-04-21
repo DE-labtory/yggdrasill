@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"crypto/sha256"
 	"time"
 
 	"github.com/it-chain/yggdrasill/util"
@@ -51,6 +52,21 @@ func (t DefaultTransaction) Serialize() ([]byte, error) {
 
 func (t DefaultTransaction) GetID() string {
 	return t.TransactionID
+}
+
+func (t DefaultTransaction) CalculateHash() ([]byte, error) {
+	serializedTx, error := util.Serialize(t)
+	if error != nil {
+		return nil, error
+	}
+
+	return calculateHash(serializedTx), nil
+}
+
+func calculateHash(b []byte) []byte {
+	hashValue := sha256.New()
+	hashValue.Write(b)
+	return hashValue.Sum(nil)
 }
 
 //

@@ -12,7 +12,6 @@ var InvalidTransactionTypeError = errors.New("Invalid Transaction Pointer Type E
 //interface를 implement하는 모든 custom block을 사용 가능하게 구현.
 type Block interface {
 	PutTransaction(transaction tx.Transaction) error
-	FindTransactionIndexByHash(txHash string)
 	Serialize() ([]byte, error)
 	GenerateHash() error
 	GetHash() string
