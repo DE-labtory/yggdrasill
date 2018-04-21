@@ -1,6 +1,11 @@
 package transaction
 
-import "time"
+import (
+	"crypto/sha256"
+	"time"
+
+	"github.com/it-chain/yggdrasill/util"
+)
 
 type TransactionStatus int
 type TxDataType string
@@ -8,32 +13,27 @@ type TransactionType int
 type FunctionType string
 
 const (
-
-	Status_TRANSACTION_UNCONFIRMED	TransactionStatus	= 0
-	Status_TRANSACTION_CONFIRMED	TransactionStatus	= 1
-	Status_TRANSACTION_UNKNOWN		TransactionStatus	= 2
+	Status_TRANSACTION_UNCONFIRMED TransactionStatus = 0
+	Status_TRANSACTION_CONFIRMED   TransactionStatus = 1
+	Status_TRANSACTION_UNKNOWN     TransactionStatus = 2
 
 	Invoke TxDataType = "invoke"
-	Query TxDataType = "query"
+	Query  TxDataType = "query"
 
 	General TransactionType = 0 + iota
-
-	Write = "write"
-	Read = "read"
-	Delete = "delete"
 )
 
 type Params struct {
-	ParamsType	int
-	Function 	string
-	Args     	[]string
+	ParamsType int
+	Function   string
+	Args       []string
 }
 
 type TxData struct {
-	Jsonrpc		string
-	Method 		TxDataType
-	Params 		Params
-	ContractID	string
+	Jsonrpc string
+	Method  TxDataType
+	Params  Params
+	ID      string
 }
 
 type DefaultTransaction struct {
@@ -45,6 +45,30 @@ type DefaultTransaction struct {
 	TimeStamp         time.Time
 	TxData            *TxData
 }
+
+func (t DefaultTransaction) Serialize() ([]byte, error) {
+	return util.Serialize(t)
+}
+
+func (t DefaultTransaction) GetID() string {
+	return t.TransactionID
+}
+
+func (t DefaultTransaction) CalculateHash() ([]byte, error) {
+	serializedTx, error := util.Serialize(t)
+	if error != nil {
+		return nil, error
+	}
+
+	return calculateHash(serializedTx), nil
+}
+
+func calculateHash(b []byte) []byte {
+	hashValue := sha256.New()
+	hashValue.Write(b)
+	return hashValue.Sum(nil)
+}
+
 //
 //func CreateNewTransaction(peer_id string, tx_id string, tx_type TransactionType, t time.Time, data *TxData) *Transaction{
 //

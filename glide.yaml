@@ -1,4 +1,6 @@
 package: github.com/it-chain/yggdrasill
 import:
+- package: github.com/stretchr/testify
+  version: v1.2.1
 - package: github.com/it-chain/leveldb-wrapper
-  version: v1.0
+  version: v1.1

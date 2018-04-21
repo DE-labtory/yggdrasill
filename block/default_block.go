@@ -16,8 +16,8 @@ import (
 
 type DefaultBlock struct {
 	Header       *BlockHeader
-	MerkleTree   [][]string
-	Transactions []*tx.Transaction
+	Proof        [][]byte
+	Transactions []*tx.DefaultTransaction
 }
 
 type BlockHeader struct {
@@ -33,14 +33,17 @@ type BlockHeader struct {
 	TransactionCount   int
 }
 
-func (block *DefaultBlock) PutTransaction(transaction *tx.Transaction) {
+func (block *DefaultBlock) PutTransaction(transaction tx.Transaction) error {
 
-	block.Transactions = append(block.Transactions, transaction)
-	block.Header.TransactionCount++
-}
+	switch transaction.(type) {
+	case *tx.DefaultTransaction:
+		block.Transactions = append(block.Transactions, transaction.(*tx.DefaultTransaction))
+		block.Header.TransactionCount++
+	default:
+		return InvalidTransactionTypeError
+	}
 
-func (block *DefaultBlock) FindTransactionIndexByHash(txHash string) {
-
+	return nil
 }
 
 func (block *DefaultBlock) Serialize() ([]byte, error) {
@@ -63,8 +66,15 @@ func (block *DefaultBlock) GetHash() string {
 	return block.Header.BlockHash
 }
 
-func (block *DefaultBlock) GetTransactions() []*tx.Transaction {
-	return block.Transactions
+func (block *DefaultBlock) GetTransactions() []tx.Transaction {
+
+	txs := make([]tx.Transaction, 0)
+
+	for _, tx := range block.Transactions {
+		txs = append(txs, tx)
+	}
+
+	return txs
 }
 
 func (block *DefaultBlock) GetHeight() uint64 {
@@ -72,7 +82,17 @@ func (block *DefaultBlock) GetHeight() uint64 {
 }
 
 func (block *DefaultBlock) IsPrev(serializedBlock []byte) bool {
-	return true
+	lastBlock := &DefaultBlock{}
+	err := util.Deserialize(serializedBlock, lastBlock)
+
+	if err != nil {
+		return false
+	}
+
+	if (block.GetHeight() == lastBlock.GetHeight()+1) && (lastBlock.GetHash() == block.Header.PreviousHash) {
+		return true
+	}
+	return false
 }
 
 func computeSHA256(data []string) string {
