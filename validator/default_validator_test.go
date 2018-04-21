@@ -8,7 +8,7 @@ import (
 	tx "github.com/it-chain/yggdrasill/transaction"
 )
 
-func TestNewMerkleTree(t *testing.T) {
+func TestMerkleTree_BuildProof(t *testing.T) {
 	testData := getTestingData(0)
 
 	tests := []struct {
@@ -26,42 +26,14 @@ func TestNewMerkleTree(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewMerkleTree(convertType(tt.txList))
+			merkleTree := &MerkleTree{}
+			got, err := merkleTree.BuildProof(convertType(tt.txList))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewMerkleTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if bytes.Compare(got.data[0], tt.wantRootHash) != 0 {
+			if bytes.Compare(got[0], tt.wantRootHash) != 0 {
 				t.Errorf("NewMerkleTree() = %v, want %v", got, tt.wantRootHash)
-			}
-		})
-	}
-}
-
-func TestMerkleTree_Serialize(t *testing.T) {
-	testData := getTestingData(0)
-	merkleTree, _ := NewMerkleTree(convertType(testData))
-
-	tests := []struct {
-		name string
-		t    *MerkleTree
-		want string
-	}{
-		{
-			name: "Serialize test",
-			t:    merkleTree,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := tt.t.Serialize()
-			newMerkleTree := &MerkleTree{data: nil}
-
-			newMerkleTree.Deserialize(s)
-			for i, bArr := range newMerkleTree.data {
-				if bytes.Compare(bArr, tt.t.data[i]) != 0 {
-					t.Errorf("Expected = %v, but Actual = %v", tt.t.data[i], bArr)
-				}
 			}
 		})
 	}
@@ -69,7 +41,8 @@ func TestMerkleTree_Serialize(t *testing.T) {
 
 func TestMerkleTree_Validate(t *testing.T) {
 	testData := getTestingData(0)
-	merkleTree, _ := NewMerkleTree(convertType(testData))
+	merkleTree := &MerkleTree{}
+	proof, _ := merkleTree.BuildProof(convertType(testData))
 	convTestData := convertType(testData)
 
 	tests := []struct {
@@ -83,7 +56,7 @@ func TestMerkleTree_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := merkleTree.Validate(convTestData); got != tt.want {
+			if got, _ := merkleTree.Validate(proof, convTestData); got != tt.want {
 				t.Errorf("MerkleTree.Validate() = %v, want %v", got, tt.want)
 			}
 		})
@@ -111,7 +84,8 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 		},
 	}
 	testData := getTestingData(0)
-	merkleTree, _ := NewMerkleTree(convertType(testData))
+	merkleTree := &MerkleTree{}
+	proof, _ := merkleTree.BuildProof(convertType(testData))
 
 	tests := []struct {
 		name string
@@ -131,7 +105,7 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := merkleTree.ValidateTransaction(tt.t); got != tt.want {
+			if got, _ := merkleTree.ValidateTransaction(proof, tt.t); got != tt.want {
 				t.Errorf("MerkleTree.ValidateTransaction() = %v, want %v", got, tt.want)
 			}
 		})
