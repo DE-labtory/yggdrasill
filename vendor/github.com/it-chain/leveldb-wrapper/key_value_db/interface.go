@@ -1,4 +1,4 @@
-package leveldbwrapper
+package key_value_db
 
 type KeyValueDBIterator interface {
 	// It returns whether such pair exist.
@@ -54,10 +54,13 @@ type KeyValueDBIterator interface {
 }
 
 type KeyValueDB interface{
+	Open()
+	Close()
  	Get(key []byte) ([]byte, error)
  	Put(key []byte, value []byte, sync bool) error
  	Delete(key []byte, sync bool) error
  	WriteBatch(KVs map[string][]byte, sync bool) error
-	GetIteratorWithPrefix() KeyValueDBIterator
+	GetIteratorWithPrefix(prefix []byte) KeyValueDBIterator
+	GetIterator(startKey []byte, endKey []byte) KeyValueDBIterator
 	Snapshot() (map[string][]byte, error)
 }

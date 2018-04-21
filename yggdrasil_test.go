@@ -1,171 +1,238 @@
-package blockchainleveldb
+package blockchaindb
 
 import (
-	"testing"
-	"github.com/it-chain/yggdrasill/block"
 	"fmt"
+	"math/rand"
+	"os"
+	"testing"
+
+	"github.com/it-chain/leveldb-wrapper"
+	"github.com/it-chain/yggdrasill/block"
+	"github.com/it-chain/yggdrasill/transaction"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestYggDrasill_GetLastBlock(t *testing.T) {
-	//dbPath := "~/.db"
-	//y := NewYggdrasil(dbPath,nil)
-	//y.AddBlock()
+func TestYggDrasill_AddBlock(t *testing.T) {
 
-
-}
-
-func TestDeserialize(t *testing.T){
-
-	var block1 block.Block
-
-	block1 = block.DefaultBlock{Header:block.BlockHeader{Height:1,CreatorID:"jun"}}
-
-	b, err := block1.Serialize()
-
-	if err != nil{
-
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
 	}
 
-	block2 := &block.DefaultBlock{}
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
 
-	err = deserialize(b,block2)
+	firstBlock := &block.DefaultBlock{Header: &block.BlockHeader{Height: 0, CreatorID: "test"}}
+	tx := &transaction.DefaultTransaction{TransactionID: "123"}
+	err := firstBlock.PutTransaction(tx)
+	assert.NoError(t, err)
 
-	if err != nil{
+	err = y.AddBlock(firstBlock)
+	assert.NoError(t, err)
 
-	}
+	lastBlock := &block.DefaultBlock{}
+	err = y.GetLastBlock(lastBlock)
+	assert.NoError(t, err)
 
-	fmt.Print(block1)
-	fmt.Print(block2)
+	assert.Equal(t, firstBlock.GetHeight(), lastBlock.GetHeight())
+	assert.Equal(t, uint64(0), firstBlock.GetHeight())
+	assert.Equal(t, uint64(0), lastBlock.GetHeight())
+	assert.Equal(t, "test", lastBlock.Header.CreatorID)
+	assert.Equal(t, "123", lastBlock.Transactions[0].TransactionID)
+
+	//fmt.Print(lastBlock)
 }
 
-//func TestBlockchainLevelDB_AddBlock(t *testing.T) {
-//	path := "./test_db"
-//	blockchainLevelDB := CreateNewBlockchainLevelDB(path)
-//	defer func(){
-//		blockchainLevelDB.Close()
-//		os.RemoveAll(path)
-//	}()
-//
-//	block := domain.CreateNewBlock(nil, "test")
-//
-//	err := blockchainLevelDB.AddBlock(block)
-//	assert.NoError(t, err)
-//}
-//
-//func TestBlockchainLevelDB_GetBlockByNumber(t *testing.T) {
-//	path := "./test_db"
-//	blockchainLevelDB := CreateNewBlockchainLevelDB(path)
-//	defer func(){
-//		blockchainLevelDB.Close()
-//		os.RemoveAll(path)
-//	}()
-//
-//	block := domain.CreateNewBlock(nil, "test")
-//	blockNumber := block.Header.Number
-//
-//	err := blockchainLevelDB.AddBlock(block)
-//	assert.NoError(t, err)
-//
-//	retrievedBlock, err := blockchainLevelDB.GetBlockByNumber(blockNumber)
-//	assert.NoError(t, err)
-//	assert.Equal(t, block, retrievedBlock)
-//}
-//
-//func TestBlockchainLevelDB_GetBlockByHash(t *testing.T) {
-//	path := "./test_db"
-//	blockchainLevelDB := CreateNewBlockchainLevelDB(path)
-//	defer func(){
-//		blockchainLevelDB.Close()
-//		os.RemoveAll(path)
-//	}()
-//
-//	block := domain.CreateNewBlock(nil, "test")
-//	blockHash := block.Header.BlockHash
-//
-//	err := blockchainLevelDB.AddBlock(block)
-//	assert.NoError(t, err)
-//
-//	retrievedBlock, err := blockchainLevelDB.GetBlockByHash(blockHash)
-//	assert.NoError(t, err)
-//	assert.Equal(t, block, retrievedBlock)
-//}
-//
-//func TestBlockchainLevelDB_GetLastBlock(t *testing.T) {
-//	path := "./test_db"
-//	blockchainLevelDB := CreateNewBlockchainLevelDB(path)
-//	defer func(){
-//		blockchainLevelDB.Close()
-//		os.RemoveAll(path)
-//	}()
-//
-//	block1 := domain.CreateNewBlock(nil, "test1")
-//	block2 := domain.CreateNewBlock(nil, "test2")
-//
-//	err := blockchainLevelDB.AddBlock(block1)
-//	assert.NoError(t, err)
-//
-//	lastBlock, err := blockchainLevelDB.GetLastBlock()
-//	assert.NoError(t, err)
-//	assert.Equal(t, block1, lastBlock)
-//
-//	err = blockchainLevelDB.AddBlock(block2)
-//	assert.NoError(t, err)
-//
-//	lastBlock, err = blockchainLevelDB.GetLastBlock()
-//	assert.NoError(t, err)
-//	assert.Equal(t, block2, lastBlock)
-//}
-//
-//func TestBlockchainLevelDB_GetTransactionByTxID(t *testing.T) {
-//	path := "./test_db"
-//	blockchainLevelDB := CreateNewBlockchainLevelDB(path)
-//	defer func(){
-//		blockchainLevelDB.Close()
-//		os.RemoveAll(path)
-//	}()
-//
-//	block := domain.CreateNewBlock(nil, "test")
-//	tx := domain.CreateNewTransaction(
-//		"test",
-//		"test",
-//		0,
-//		time.Now().Round(0),
-//		&domain.TxData{})
-//	tx.GenerateHash()
-//	err :=block.PutTranscation(tx)
-//	assert.NoError(t, err)
-//
-//	err = blockchainLevelDB.AddBlock(block)
-//	assert.NoError(t, err)
-//
-//	retrievedTx, err := blockchainLevelDB.GetTransactionByTxID("test")
-//	assert.NoError(t, err)
-//	assert.Equal(t, tx, retrievedTx)
-//}
-//
-//func TestBlockchainLevelDB_GetBlockByTxID(t *testing.T) {
-//	path := "./test_db"
-//	blockchainLevelDB := CreateNewBlockchainLevelDB(path)
-//	defer func(){
-//		blockchainLevelDB.Close()
-//		os.RemoveAll(path)
-//	}()
-//
-//	block := domain.CreateNewBlock(nil, "test")
-//	tx := domain.CreateNewTransaction(
-//		"test",
-//		"test",
-//		0,
-//		time.Now().Round(0),
-//		&domain.TxData{})
-//	tx.GenerateHash()
-//	err := block.PutTranscation(tx)
-//	assert.NoError(t, err)
-//
-//	err = blockchainLevelDB.AddBlock(block)
-//	assert.NoError(t, err)
-//
-//	retrievedBlock, err := blockchainLevelDB.GetBlockByTxID("test")
-//	assert.NoError(t, err)
-//	assert.Equal(t, block, retrievedBlock)
-//}
+//when height did not matched
+func TestYggDrasill_AddBlock2(t *testing.T) {
+
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	block1 := &block.DefaultBlock{Header: &block.BlockHeader{Height: 0, CreatorID: "test"}}
+	block2 := &block.DefaultBlock{Header: &block.BlockHeader{Height: 2, CreatorID: "test"}}
+
+	err := y.AddBlock(block1)
+	assert.NoError(t, err)
+
+	err = y.AddBlock(block2)
+	assert.Error(t, err)
+}
+
+func TestYggdrasil_GetBlockByNumber(t *testing.T) {
+
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	for i := 0; i < 100; i++ {
+		tmpBlock := &block.DefaultBlock{Header: &block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
+		if i > 0 {
+			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
+		}
+
+		err := y.AddBlock(tmpBlock)
+		assert.NoError(t, err)
+	}
+
+	randomNumber := uint64(rand.Intn(100))
+
+	retrievedBlock := &block.DefaultBlock{}
+	err := y.GetBlockByNumber(retrievedBlock, randomNumber)
+
+	assert.NoError(t, err)
+	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
+	assert.Equal(t, fmt.Sprintf("test_%d", randomNumber), retrievedBlock.Header.CreatorID)
+}
+
+func TestYggdrasil_GetBlockByHash(t *testing.T) {
+
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	for i := 0; i < 100; i++ {
+		tmpBlock := &block.DefaultBlock{Header: &block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
+		if i > 0 {
+			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
+		}
+
+		err := y.AddBlock(tmpBlock)
+		assert.NoError(t, err)
+	}
+
+	randomNumber := uint64(rand.Intn(100))
+
+	retrievedBlock := &block.DefaultBlock{}
+	err := y.GetBlockByHash(retrievedBlock, fmt.Sprintf("hash_%d", randomNumber))
+
+	assert.NoError(t, err)
+	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
+	assert.Equal(t, fmt.Sprintf("test_%d", randomNumber), retrievedBlock.Header.CreatorID)
+}
+
+func TestYggdrasil_GetLastBlock(t *testing.T) {
+
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	for i := 0; i < 100; i++ {
+		tmpBlock := &block.DefaultBlock{Header: &block.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
+		if i > 0 {
+			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
+		}
+
+		err := y.AddBlock(tmpBlock)
+		assert.NoError(t, err)
+	}
+
+	retrievedBlock := &block.DefaultBlock{}
+	err := y.GetLastBlock(retrievedBlock)
+
+	assert.NoError(t, err)
+	assert.Equal(t, uint64(99), retrievedBlock.GetHeight())
+	assert.Equal(t, "test_99", retrievedBlock.Header.CreatorID)
+}
+
+func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
+
+	//given
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	firstBlock := &block.DefaultBlock{Header: &block.BlockHeader{Height: 0, CreatorID: "test"}}
+	tx := &transaction.DefaultTransaction{TransactionID: "123"}
+	err := firstBlock.PutTransaction(tx)
+	assert.NoError(t, err)
+
+	err = y.AddBlock(firstBlock)
+	assert.NoError(t, err)
+
+	//when
+	retrievedTx := &transaction.DefaultTransaction{}
+	err = y.GetTransactionByTxID(retrievedTx, tx.TransactionID)
+	assert.NoError(t, err)
+
+	//then
+	assert.Equal(t, retrievedTx, tx)
+}
+
+func TestYggdrasil_GetBlockByTxID(t *testing.T) {
+
+	//given
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasil(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	firstBlock := &block.DefaultBlock{Header: &block.BlockHeader{Height: 0, CreatorID: "test"}}
+	tx := &transaction.DefaultTransaction{TransactionID: "123"}
+	err := firstBlock.PutTransaction(tx)
+	assert.NoError(t, err)
+
+	err = y.AddBlock(firstBlock)
+	assert.NoError(t, err)
+
+	//when
+	retrievedBlock := &block.DefaultBlock{}
+	err = y.GetBlockByTxID(retrievedBlock, tx.TransactionID)
+	assert.NoError(t, err)
+
+	//then
+	assert.Equal(t, firstBlock, retrievedBlock)
+}
