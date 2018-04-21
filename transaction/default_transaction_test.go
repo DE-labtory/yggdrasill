@@ -2,30 +2,14 @@ package transaction
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 	"time"
 )
 
 func TestNewDefaultTransaction(t *testing.T) {
-	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
-	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
-
-	testData := &DefaultTransaction{
-		ID:        "transactionID01",
-		PeerID:    "peerID01",
-		Timestamp: testingTime,
-		Status:    StatusTransactionInvalid,
-		TxData: &TxData{
-			Jsonrpc: "jsonrpc",
-			Method:  Invoke,
-			ID:      "contractID01",
-			Params: Params{
-				Type:     1,
-				Function: "functionName",
-				Args:     make([]string, 0),
-			},
-		},
-	}
+	testData := getTestData()
+	testingTime := getTestingTime()
 
 	test := struct {
 		name         string
@@ -48,4 +32,84 @@ func TestNewDefaultTransaction(t *testing.T) {
 			t.Errorf("NewDefaultTransaction() = %v, want %v", got, test.expectedByte)
 		}
 	})
+}
+
+func TestDefaultTransaction_CalculateHash(t *testing.T) {
+	testData := getTestData()
+
+	tests := []struct {
+		name    string
+		tx      *DefaultTransaction
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name:    "Test CalculateHash",
+			tx:      testData,
+			want:    []byte{160, 111, 85, 201, 10, 162, 8, 252, 84, 135, 199, 9, 109, 167, 73, 32, 140, 84, 200, 238, 251, 38, 41, 8, 189, 128, 188, 43, 32, 172, 58, 120},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.tx.CalculateHash()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DefaultTransaction.CalculateHash() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if bytes.Compare(got, tt.want) != 0 {
+				t.Errorf("DefaultTransaction.CalculateHash() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_calculateHash(t *testing.T) {
+	type args struct {
+		b []byte
+	}
+	tests := []struct {
+		name string
+		args args
+		want []byte
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := calculateHash(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("calculateHash() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func getTestingTime() time.Time {
+	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
+	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
+
+	return testingTime
+}
+
+func getTestData() *DefaultTransaction {
+	testingTime := getTestingTime()
+
+	testData := &DefaultTransaction{
+		ID:        "transactionID01",
+		PeerID:    "peerID01",
+		Timestamp: testingTime,
+		Status:    StatusTransactionInvalid,
+		TxData: &TxData{
+			Jsonrpc: "jsonrpc",
+			Method:  Invoke,
+			ID:      "contractID01",
+			Params: Params{
+				Type:     1,
+				Function: "functionName",
+				Args:     make([]string, 0),
+			},
+		},
+	}
+
+	return testData
 }
