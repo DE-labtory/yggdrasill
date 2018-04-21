@@ -31,9 +31,9 @@ const (
 
 // Params 구조체는 Jsonrpc에서 invoke하는 함수의 패러미터를 정의한다.
 type Params struct {
-	ParamsType int
-	Function   string
-	Args       []string
+	Type     int
+	Function string
+	Args     []string
 }
 
 // TxData 구조체는 Jsonrpc에서 invoke하는 함수를 정의한다.
@@ -80,6 +80,31 @@ func calculateHash(b []byte) []byte {
 }
 
 // NewDefaultTransaction 함수는 새로운 DefaultTransaction를 반환한다.
-func NewDefaultTransaction() *DefaultTransaction {
-	return nil
+func NewDefaultTransaction(peerID string, txID string, timestamp time.Time, txData *TxData) *DefaultTransaction {
+	return &DefaultTransaction{
+		ID:        txID,
+		PeerID:    peerID,
+		Timestamp: timestamp,
+		TxData:    txData,
+		Status:    StatusTransactionInvalid,
+	}
+}
+
+// NewTxData 함수는 새로운 TxData 객체를 반환한다.
+func NewTxData(jsonrpc string, method TxDataType, params Params, contractID string) *TxData {
+	return &TxData{
+		Jsonrpc: jsonrpc,
+		Method:  method,
+		Params:  params,
+		ID:      contractID,
+	}
+}
+
+// NewParams 함수는 새로운 Params 객체를 반환한다. (포인터가 아니라 객체 자체를 반환한다.)
+func NewParams(paramsType int, function string, args []string) Params {
+	return Params{
+		Type:     paramsType,
+		Function: function,
+		Args:     args,
+	}
 }
