@@ -20,7 +20,7 @@ func TestYggDrasill_AddBlock(t *testing.T) {
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasil(db, nil, opts)
+	y := NewYggdrasill(db, nil, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -56,7 +56,7 @@ func TestYggDrasill_AddBlock2(t *testing.T) {
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasil(db, nil, opts)
+	y := NewYggdrasill(db, nil, opts)
 
 	defer func() {
 		y.Close()
@@ -81,7 +81,7 @@ func TestYggdrasil_GetBlockByNumber(t *testing.T) {
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasil(db, nil, opts)
+	y := NewYggdrasill(db, nil, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -115,7 +115,7 @@ func TestYggdrasil_GetBlockByHash(t *testing.T) {
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasil(db, nil, opts)
+	y := NewYggdrasill(db, nil, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -149,7 +149,7 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasil(db, nil, opts)
+	y := NewYggdrasill(db, nil, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -182,7 +182,7 @@ func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasil(db, nil, opts)
+	y := NewYggdrasill(db, nil, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -214,7 +214,7 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasil(db, nil, opts)
+	y := NewYggdrasill(db, nil, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
