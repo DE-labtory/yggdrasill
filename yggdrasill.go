@@ -18,27 +18,27 @@ const (
 	LAST_BLOCK_KEY  = "last_block"
 )
 
-type Yggdrasil struct {
+type Yggdrasill struct {
 	DBProvider *DBProvider
 	validator  validator.Validator
 }
 
-func NewYggdrasil(keyValueDB key_value_db.KeyValueDB, validator validator.Validator, opts map[string]interface{}) *Yggdrasil {
+func NewYggdrasill(keyValueDB key_value_db.KeyValueDB, validator validator.Validator, opts map[string]interface{}) *Yggdrasill {
 
 	dbProvider := CreateNewDBProvider(keyValueDB)
 
-	return &Yggdrasil{DBProvider: dbProvider, validator: validator}
+	return &Yggdrasill{DBProvider: dbProvider, validator: validator}
 }
 
-func (y *Yggdrasil) Close() {
+func (y *Yggdrasill) Close() {
 	y.DBProvider.Close()
 }
 
-func (y *Yggdrasil) createGenesisBlock() {
+func (y *Yggdrasill) createGenesisBlock() {
 
 }
 
-func (y *Yggdrasil) AddBlock(block block.Block) error {
+func (y *Yggdrasill) AddBlock(block block.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 	lastBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
 
@@ -94,7 +94,7 @@ func (y *Yggdrasil) AddBlock(block block.Block) error {
 	return nil
 }
 
-func (y *Yggdrasil) GetBlockByNumber(block block.Block, blockNumber uint64) error {
+func (y *Yggdrasill) GetBlockByNumber(block block.Block, blockNumber uint64) error {
 	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 
 	blockHash, err := blockNumberDB.Get([]byte(fmt.Sprint(blockNumber)))
@@ -105,7 +105,7 @@ func (y *Yggdrasil) GetBlockByNumber(block block.Block, blockNumber uint64) erro
 	return y.GetBlockByHash(block, string(blockHash))
 }
 
-func (y *Yggdrasil) GetBlockByHash(block block.Block, hash string) error {
+func (y *Yggdrasill) GetBlockByHash(block block.Block, hash string) error {
 	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
 
 	serializedBlock, err := blockHashDB.Get([]byte(hash))
@@ -118,7 +118,7 @@ func (y *Yggdrasil) GetBlockByHash(block block.Block, hash string) error {
 	return err
 }
 
-func (y *Yggdrasil) GetLastBlock(block block.Block) error {
+func (y *Yggdrasill) GetLastBlock(block block.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
 	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
@@ -131,7 +131,7 @@ func (y *Yggdrasil) GetLastBlock(block block.Block) error {
 	return err
 }
 
-func (y *Yggdrasil) GetTransactionByTxID(transaction transaction.Transaction, txid string) error {
+func (y *Yggdrasill) GetTransactionByTxID(transaction transaction.Transaction, txid string) error {
 	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
 
 	serializedTX, err := transactionDB.Get([]byte(txid))
@@ -144,7 +144,7 @@ func (y *Yggdrasil) GetTransactionByTxID(transaction transaction.Transaction, tx
 	return err
 }
 
-func (y *Yggdrasil) GetBlockByTxID(block block.Block, txid string) error {
+func (y *Yggdrasill) GetBlockByTxID(block block.Block, txid string) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
 	blockHash, err := utilDB.Get([]byte(txid))
