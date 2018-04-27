@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
-	"github.com/it-chain/yggdrasill/block"
+	"github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/yggdrasill/transaction"
 	"github.com/it-chain/yggdrasill/util"
 	"github.com/it-chain/yggdrasill/validator"
@@ -38,17 +38,18 @@ func (y *Yggdrasill) createGenesisBlock() {
 
 }
 
-func (y *Yggdrasill) AddBlock(block block.Block) error {
+func (y *Yggdrasill) AddBlock(block common.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
-	lastBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
 
-	if err != nil {
-		return err
-	}
+	// TODO: Check the last block
+	// lastBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
+	// if err != nil {
+	// 	return err
+	// }
 
-	if lastBlock != nil && !block.IsPrev(lastBlock) {
-		return NewBlockError("height or prevHash is not matched")
-	}
+	// if lastBlock != nil && !block.IsPrev(lastBlock) {
+	// 	return NewBlockError("height or prevHash is not matched")
+	// }
 
 	serializedBlock, err := block.Serialize()
 	if err != nil {
@@ -59,12 +60,12 @@ func (y *Yggdrasill) AddBlock(block block.Block) error {
 	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
 
-	err = blockHashDB.Put([]byte(block.GetHash()), serializedBlock, true)
+	err = blockHashDB.Put(block.Seal(), serializedBlock, true)
 	if err != nil {
 		return err
 	}
 
-	err = blockNumberDB.Put([]byte(fmt.Sprint(block.GetHeight())), []byte(block.GetHash()), true)
+	err = blockNumberDB.Put([]byte(fmt.Sprint(block.Height())), block.Seal(), true)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func (y *Yggdrasill) AddBlock(block block.Block) error {
 		return err
 	}
 
-	for _, tx := range block.GetTransactions() {
+	for _, tx := range block.TxList() {
 		serializedTX, err := tx.Serialize()
 		if err != nil {
 			return err
@@ -85,7 +86,7 @@ func (y *Yggdrasill) AddBlock(block block.Block) error {
 			return err
 		}
 
-		err = utilDB.Put([]byte(tx.GetID()), []byte(block.GetHash()), true)
+		err = utilDB.Put([]byte(tx.GetID()), block.Seal(), true)
 		if err != nil {
 			return err
 		}
@@ -94,21 +95,21 @@ func (y *Yggdrasill) AddBlock(block block.Block) error {
 	return nil
 }
 
-func (y *Yggdrasill) GetBlockByNumber(block block.Block, blockNumber uint64) error {
+func (y *Yggdrasill) GetBlockByNumber(block common.Block, height uint64) error {
 	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 
-	blockHash, err := blockNumberDB.Get([]byte(fmt.Sprint(blockNumber)))
+	blockHash, err := blockNumberDB.Get([]byte(fmt.Sprint(height)))
 	if err != nil {
 		return err
 	}
 
-	return y.GetBlockByHash(block, string(blockHash))
+	return y.GetBlockBySeal(block, blockHash)
 }
 
-func (y *Yggdrasill) GetBlockByHash(block block.Block, hash string) error {
+func (y *Yggdrasill) GetBlockBySeal(block common.Block, seal []byte) error {
 	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
 
-	serializedBlock, err := blockHashDB.Get([]byte(hash))
+	serializedBlock, err := blockHashDB.Get(seal)
 	if err != nil {
 		return err
 	}
@@ -118,7 +119,7 @@ func (y *Yggdrasill) GetBlockByHash(block block.Block, hash string) error {
 	return err
 }
 
-func (y *Yggdrasill) GetLastBlock(block block.Block) error {
+func (y *Yggdrasill) GetLastBlock(block common.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
 	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
@@ -144,7 +145,7 @@ func (y *Yggdrasill) GetTransactionByTxID(transaction transaction.Transaction, t
 	return err
 }
 
-func (y *Yggdrasill) GetBlockByTxID(block block.Block, txid string) error {
+func (y *Yggdrasill) GetBlockByTxID(block common.Block, txid string) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
 	blockHash, err := utilDB.Get([]byte(txid))
@@ -153,5 +154,5 @@ func (y *Yggdrasill) GetBlockByTxID(block block.Block, txid string) error {
 		return err
 	}
 
-	return y.GetBlockByHash(block, string(blockHash))
+	return y.GetBlockBySeal(block, blockHash)
 }
