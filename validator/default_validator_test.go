@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"bytes"
 	"testing"
 	"time"
 
@@ -12,34 +11,34 @@ func TestMerkleTree_BuildProofAndTxProof(t *testing.T) {
 	testData := getTestingData(0)
 
 	tests := []struct {
-		name         string
-		txList       []*tx.DefaultTransaction
-		wantRootHash []byte
-		wantErr      bool
+		name      string
+		txList    []*tx.DefaultTransaction
+		wantProof []byte
+		wantErr   bool
 	}{
 		{
-			name:         "Create new merkle tree",
-			txList:       testData,
-			wantRootHash: []byte{119, 178, 207, 195, 123, 230, 211, 193, 142, 68, 255, 99, 226, 172, 207, 211, 75, 251, 211, 128, 175, 230, 141, 51, 3, 186, 19, 179, 197, 104, 230, 29},
-			wantErr:      false,
+			name:      "Create new merkle tree",
+			txList:    testData,
+			wantProof: []byte{119, 178, 207, 195, 123, 230, 211, 193, 142, 68, 255, 99, 226, 172, 207, 211, 75, 251, 211, 128, 175, 230, 141, 51, 3, 186, 19, 179, 197, 104, 230, 29},
+			wantErr:   false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			merkleTree := &MerkleTree{}
-			gotRoot, _, err := merkleTree.BuildProofAndTxProof(convertType(tt.txList))
+			gotProof, _, err := merkleTree.BuildProofAndTxProof(convertType(tt.txList))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewMerkleTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if bytes.Compare(gotRoot, tt.wantRootHash) != 0 {
-				t.Errorf("NewMerkleTree() = %v, want %v", gotRoot, tt.wantRootHash)
+			if !merkleTree.ValidateProof(gotProof, tt.wantProof) {
+				t.Errorf("NewMerkleTree() = %v, want %v", gotProof, tt.wantProof)
 			}
 		})
 	}
 }
 
-func TestMerkleTree_Validate(t *testing.T) {
+func TestMerkleTree_ValidateTxProof(t *testing.T) {
 	testData := getTestingData(0)
 	merkleTree := &MerkleTree{}
 	_, tree, _ := merkleTree.BuildProofAndTxProof(convertType(testData))
@@ -56,8 +55,8 @@ func TestMerkleTree_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := merkleTree.Validate(tree, convTestData); got != tt.want {
-				t.Errorf("MerkleTree.Validate() = %v, want %v", got, tt.want)
+			if got, _ := merkleTree.ValidateTxProof(tree, convTestData); got != tt.want {
+				t.Errorf("MerkleTree.ValidateTxProof() = %v, want %v", got, tt.want)
 			}
 		})
 	}

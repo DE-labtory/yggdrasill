@@ -17,12 +17,17 @@ var ErrHashCalculationFailed = errors.New("Hash Calculation Failed Error")
 // MerkleTree 객체는 Validator interface를 구현한 객체.
 type MerkleTree struct{}
 
-// Validate 함수는 주어진 Transaction 리스트에 따라 주어진 MerkleTree 전체(proof)를 검증함.
-func (t *MerkleTree) Validate(proof [][]byte, txList []tx.Transaction) (bool, error) {
+// ValidateProof 함수는 원래 Proof 값과 주어진 Proof 값(comparisonProof)을 비교하여, 올바른지 검증한다.
+func (t *MerkleTree) ValidateProof(proof []byte, comparisonProof []byte) bool {
+	return bytes.Compare(proof, comparisonProof) == 0
+}
+
+// ValidateTxProof 함수는 주어진 Transaction 리스트에 따라 주어진 MerkleTree 전체(proof)를 검증함.
+func (t *MerkleTree) ValidateTxProof(txProof [][]byte, txList []tx.Transaction) (bool, error) {
 	leafNodeIndex := 0
-	for i, n := range proof {
+	for i, n := range txProof {
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
-		if rightIndex >= len(proof) {
+		if rightIndex >= len(txProof) {
 			// Check Leaf Node
 			calculatedHash, error := txList[leafNodeIndex].CalculateHash()
 			if error != nil {
@@ -35,7 +40,7 @@ func (t *MerkleTree) Validate(proof [][]byte, txList []tx.Transaction) (bool, er
 			leafNodeIndex++
 		} else {
 			// Check Intermediate Node
-			leftNode, rightNode := proof[leftIndex], proof[rightIndex]
+			leftNode, rightNode := txProof[leftIndex], txProof[rightIndex]
 			calculatedHash := calculateIntermediateNodeHash(leftNode, rightNode)
 			if bytes.Compare(n, calculatedHash) != 0 {
 				return false, nil
@@ -46,15 +51,15 @@ func (t *MerkleTree) Validate(proof [][]byte, txList []tx.Transaction) (bool, er
 	return true, nil
 }
 
-// ValidateTransaction 함수는 주어진 Transaction이 이 merkletree(proof)에 올바로 있는지를 확인한다.
-func (t *MerkleTree) ValidateTransaction(proof [][]byte, tx tx.Transaction) (bool, error) {
+// ValidateTransaction 함수는 주어진 Transaction이 이 merkletree(txProof)에 올바로 있는지를 확인한다.
+func (t *MerkleTree) ValidateTransaction(txProof [][]byte, tx tx.Transaction) (bool, error) {
 	hash, error := tx.CalculateHash()
 	if error != nil {
 		return false, error
 	}
 
 	index := -1
-	for i, h := range proof {
+	for i, h := range txProof {
 		if bytes.Compare(h, hash) == 0 {
 			index = i
 		}
@@ -79,12 +84,12 @@ func (t *MerkleTree) ValidateTransaction(proof [][]byte, tx tx.Transaction) (boo
 
 		var parentHash []byte
 		if isLeft {
-			parentHash = calculateIntermediateNodeHash(proof[index], proof[siblingIndex])
+			parentHash = calculateIntermediateNodeHash(txProof[index], txProof[siblingIndex])
 		} else {
-			parentHash = calculateIntermediateNodeHash(proof[siblingIndex], proof[index])
+			parentHash = calculateIntermediateNodeHash(txProof[siblingIndex], txProof[index])
 		}
 
-		if bytes.Compare(parentHash, proof[parentIndex]) != 0 {
+		if bytes.Compare(parentHash, txProof[parentIndex]) != 0 {
 			return false, nil
 		}
 
