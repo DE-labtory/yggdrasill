@@ -8,7 +8,7 @@ import (
 	tx "github.com/it-chain/yggdrasill/transaction"
 )
 
-func TestMerkleTree_BuildProof(t *testing.T) {
+func TestMerkleTree_BuildTxProof(t *testing.T) {
 	testData := getTestingData(0)
 
 	tests := []struct {
@@ -20,20 +20,20 @@ func TestMerkleTree_BuildProof(t *testing.T) {
 		{
 			name:         "Create new merkle tree",
 			txList:       testData,
-			wantRootHash: []byte{101, 200, 55, 65, 195, 166, 219, 48, 181, 132, 201, 148, 122, 187, 113, 151, 196, 136, 178, 241, 183, 21, 166, 213, 54, 196, 27, 116, 45, 204, 153, 17},
+			wantRootHash: []byte{119, 178, 207, 195, 123, 230, 211, 193, 142, 68, 255, 99, 226, 172, 207, 211, 75, 251, 211, 128, 175, 230, 141, 51, 3, 186, 19, 179, 197, 104, 230, 29},
 			wantErr:      false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			merkleTree := &MerkleTree{}
-			got, err := merkleTree.BuildProof(convertType(tt.txList))
+			got, err := merkleTree.BuildTxProof(convertType(tt.txList))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewMerkleTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if bytes.Compare(got[0], tt.wantRootHash) != 0 {
-				t.Errorf("NewMerkleTree() = %v, want %v", got, tt.wantRootHash)
+				t.Errorf("NewMerkleTree() = %v, want %v", got[0], tt.wantRootHash)
 			}
 		})
 	}
@@ -42,7 +42,7 @@ func TestMerkleTree_BuildProof(t *testing.T) {
 func TestMerkleTree_Validate(t *testing.T) {
 	testData := getTestingData(0)
 	merkleTree := &MerkleTree{}
-	proof, _ := merkleTree.BuildProof(convertType(testData))
+	proof, _ := merkleTree.BuildTxProof(convertType(testData))
 	convTestData := convertType(testData)
 
 	tests := []struct {
@@ -66,26 +66,24 @@ func TestMerkleTree_Validate(t *testing.T) {
 func TestMerkleTree_ValidateTransaction(t *testing.T) {
 	notIncludedTxTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (PST)")
 	notIncludedTx := &tx.DefaultTransaction{
-		InvokePeerID:      "p05",
-		TransactionID:     "tx05",
-		TransactionStatus: 0,
-		TransactionType:   0,
-		TransactionHash:   "hashValue",
-		TimeStamp:         notIncludedTxTime,
+		PeerID:    "p05",
+		ID:        "tx05",
+		Status:    0,
+		Timestamp: notIncludedTxTime,
 		TxData: &tx.TxData{
 			Jsonrpc: "jsonRPC05",
 			Method:  "invoke",
 			Params: tx.Params{
-				ParamsType: 0,
-				Function:   "function05",
-				Args:       []string{"arg1", "arg2"},
+				Type:     0,
+				Function: "function05",
+				Args:     []string{"arg1", "arg2"},
 			},
 			ID: "txdata05",
 		},
 	}
 	testData := getTestingData(0)
 	merkleTree := &MerkleTree{}
-	proof, _ := merkleTree.BuildProof(convertType(testData))
+	proof, _ := merkleTree.BuildTxProof(convertType(testData))
 
 	tests := []struct {
 		name string
@@ -119,73 +117,65 @@ func getTestingData(index int) []*tx.DefaultTransaction {
 	return [][]*tx.DefaultTransaction{
 		[]*tx.DefaultTransaction{
 			&tx.DefaultTransaction{
-				InvokePeerID:      "p01",
-				TransactionID:     "tx01",
-				TransactionStatus: 0,
-				TransactionType:   0,
-				TransactionHash:   "hashValue",
-				TimeStamp:         testingTime,
+				PeerID:    "p01",
+				ID:        "tx01",
+				Status:    0,
+				Timestamp: testingTime,
 				TxData: &tx.TxData{
 					Jsonrpc: "jsonRPC01",
 					Method:  "invoke",
 					Params: tx.Params{
-						ParamsType: 0,
-						Function:   "function01",
-						Args:       []string{"arg1", "arg2"},
+						Type:     0,
+						Function: "function01",
+						Args:     []string{"arg1", "arg2"},
 					},
 					ID: "txdata01",
 				},
 			},
 			&tx.DefaultTransaction{
-				InvokePeerID:      "p02",
-				TransactionID:     "tx02",
-				TransactionStatus: 0,
-				TransactionType:   0,
-				TransactionHash:   "hashValue",
-				TimeStamp:         testingTime,
+				PeerID:    "p02",
+				ID:        "tx02",
+				Status:    0,
+				Timestamp: testingTime,
 				TxData: &tx.TxData{
 					Jsonrpc: "jsonRPC02",
 					Method:  "invoke",
 					Params: tx.Params{
-						ParamsType: 0,
-						Function:   "function02",
-						Args:       []string{"arg1", "arg2"},
+						Type:     0,
+						Function: "function02",
+						Args:     []string{"arg1", "arg2"},
 					},
 					ID: "txdata02",
 				},
 			},
 			&tx.DefaultTransaction{
-				InvokePeerID:      "p03",
-				TransactionID:     "tx03",
-				TransactionStatus: 0,
-				TransactionType:   0,
-				TransactionHash:   "hashValue",
-				TimeStamp:         testingTime,
+				PeerID:    "p03",
+				ID:        "tx03",
+				Status:    0,
+				Timestamp: testingTime,
 				TxData: &tx.TxData{
 					Jsonrpc: "jsonRPC03",
 					Method:  "invoke",
 					Params: tx.Params{
-						ParamsType: 0,
-						Function:   "function03",
-						Args:       []string{"arg1", "arg2"},
+						Type:     0,
+						Function: "function03",
+						Args:     []string{"arg1", "arg2"},
 					},
 					ID: "txdata03",
 				},
 			},
 			&tx.DefaultTransaction{
-				InvokePeerID:      "p04",
-				TransactionID:     "tx04",
-				TransactionStatus: 0,
-				TransactionType:   0,
-				TransactionHash:   "hashValue",
-				TimeStamp:         testingTime,
+				PeerID:    "p04",
+				ID:        "tx04",
+				Status:    0,
+				Timestamp: testingTime,
 				TxData: &tx.TxData{
 					Jsonrpc: "jsonRPC04",
 					Method:  "invoke",
 					Params: tx.Params{
-						ParamsType: 0,
-						Function:   "function04",
-						Args:       []string{"arg1", "arg2"},
+						Type:     0,
+						Function: "function04",
+						Args:     []string{"arg1", "arg2"},
 					},
 					ID: "txdata04",
 				},

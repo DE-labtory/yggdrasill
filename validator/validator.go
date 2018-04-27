@@ -7,5 +7,5 @@ import tx "github.com/it-chain/yggdrasill/transaction"
 type Validator interface {
 	Validate(proof [][]byte, txList []tx.Transaction) (bool, error)
 	ValidateTransaction(proof [][]byte, transaction tx.Transaction) (bool, error)
-	BuildProof(txList []tx.Transaction) ([][]byte, error)
+	BuildTxProof(txList []tx.Transaction) ([][]byte, error)
 }

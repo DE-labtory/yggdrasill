@@ -94,8 +94,8 @@ func (t *MerkleTree) ValidateTransaction(proof [][]byte, tx tx.Transaction) (boo
 	return true, nil
 }
 
-// BuildProof 는 DefaultTransaction 배열을 받아서 MerkleTree 객체를 생성하여 반환한다.
-func (t *MerkleTree) BuildProof(txList []tx.Transaction) ([][]byte, error) {
+// BuildTxProof 는 DefaultTransaction 배열을 받아서 MerkleTree 객체를 생성하여 반환한다.
+func (t *MerkleTree) BuildTxProof(txList []tx.Transaction) ([][]byte, error) {
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
