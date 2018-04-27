@@ -94,14 +94,16 @@ func (t *MerkleTree) ValidateTransaction(proof [][]byte, tx tx.Transaction) (boo
 	return true, nil
 }
 
-// BuildTxProof 는 DefaultTransaction 배열을 받아서 MerkleTree 객체를 생성하여 반환한다.
-func (t *MerkleTree) BuildTxProof(txList []tx.Transaction) ([][]byte, error) {
+// BuildProofAndTxProof 는 DefaultTransaction 배열을 받아서 MerkleTree 객체와 Proof를 생성하여 반환한다.
+// Proof는 주어진 txList의 위변조가 없다는 것을 증명할 []byte 값으로 MerkleTree의 경우 루트 노드 값을 사용한다.
+// TxProof는 개별 transaction들 각각에 대한 Proof 리스트를 의미한다.
+func (t *MerkleTree) BuildProofAndTxProof(txList []tx.Transaction) ([]byte, [][]byte, error) {
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
 		leafNode, error := tx.CalculateHash()
 		if error != nil {
-			return nil, error
+			return nil, nil, error
 		}
 
 		leafNodeList = append(leafNodeList, leafNode)
@@ -115,10 +117,11 @@ func (t *MerkleTree) BuildTxProof(txList []tx.Transaction) ([][]byte, error) {
 
 	tree, error := buildTree(leafNodeList, leafNodeList)
 	if error != nil {
-		return nil, error
+		return nil, nil, error
 	}
 
-	return tree, nil
+	// DefaultValidator 는 Merkle Tree의 루트노드(tree[0])를 Proof로 간주함
+	return tree[0], tree, nil
 }
 
 func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {

@@ -8,7 +8,7 @@ import (
 	tx "github.com/it-chain/yggdrasill/transaction"
 )
 
-func TestMerkleTree_BuildTxProof(t *testing.T) {
+func TestMerkleTree_BuildProofAndTxProof(t *testing.T) {
 	testData := getTestingData(0)
 
 	tests := []struct {
@@ -27,13 +27,13 @@ func TestMerkleTree_BuildTxProof(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			merkleTree := &MerkleTree{}
-			got, err := merkleTree.BuildTxProof(convertType(tt.txList))
+			gotRoot, _, err := merkleTree.BuildProofAndTxProof(convertType(tt.txList))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewMerkleTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if bytes.Compare(got[0], tt.wantRootHash) != 0 {
-				t.Errorf("NewMerkleTree() = %v, want %v", got[0], tt.wantRootHash)
+			if bytes.Compare(gotRoot, tt.wantRootHash) != 0 {
+				t.Errorf("NewMerkleTree() = %v, want %v", gotRoot, tt.wantRootHash)
 			}
 		})
 	}
@@ -42,7 +42,7 @@ func TestMerkleTree_BuildTxProof(t *testing.T) {
 func TestMerkleTree_Validate(t *testing.T) {
 	testData := getTestingData(0)
 	merkleTree := &MerkleTree{}
-	proof, _ := merkleTree.BuildTxProof(convertType(testData))
+	_, tree, _ := merkleTree.BuildProofAndTxProof(convertType(testData))
 	convTestData := convertType(testData)
 
 	tests := []struct {
@@ -56,7 +56,7 @@ func TestMerkleTree_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := merkleTree.Validate(proof, convTestData); got != tt.want {
+			if got, _ := merkleTree.Validate(tree, convTestData); got != tt.want {
 				t.Errorf("MerkleTree.Validate() = %v, want %v", got, tt.want)
 			}
 		})
@@ -83,7 +83,7 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 	}
 	testData := getTestingData(0)
 	merkleTree := &MerkleTree{}
-	proof, _ := merkleTree.BuildTxProof(convertType(testData))
+	_, tree, _ := merkleTree.BuildProofAndTxProof(convertType(testData))
 
 	tests := []struct {
 		name string
@@ -103,7 +103,7 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := merkleTree.ValidateTransaction(proof, tt.t); got != tt.want {
+			if got, _ := merkleTree.ValidateTransaction(tree, tt.t); got != tt.want {
 				t.Errorf("MerkleTree.ValidateTransaction() = %v, want %v", got, tt.want)
 			}
 		})
