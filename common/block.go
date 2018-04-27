@@ -2,8 +2,6 @@ package common
 
 import (
 	"errors"
-
-	tx "github.com/it-chain/yggdrasill/transaction"
 )
 
 var ErrTransactionType = errors.New("Wrong transaction type")
@@ -16,14 +14,14 @@ type Block interface {
 	GenerateSeal() ([]byte, error)
 	SetPrevSeal(prevSeal []byte)
 	SetHeight(height uint64)
-	PutTx(tx tx.Transaction) error
+	PutTx(tx Transaction) error
 	SetTxListSeal(txListSeal [][]byte)
 
 	// Block의 required field getters
 	Seal() []byte
 	PrevSeal() []byte
 	Height() uint64
-	TxList() []tx.Transaction
+	TxList() []Transaction
 	TxListSeal() [][]byte
 
 	// Block을 저장을 위한 []byte로 변환 및 재변환

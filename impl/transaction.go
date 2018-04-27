@@ -1,7 +1,6 @@
-package transaction
+package impl
 
 import (
-	"crypto/sha256"
 	"time"
 
 	"github.com/it-chain/yggdrasill/util"
@@ -56,6 +55,7 @@ type DefaultTransaction struct {
 
 // Serialize 함수는 Transaction을 []byte 형태로 변환한다.
 func (t DefaultTransaction) Serialize() ([]byte, error) {
+	// TODO: util에서 복사해오기.
 	return util.Serialize(t)
 }
 
@@ -65,19 +65,15 @@ func (t DefaultTransaction) GetID() string {
 }
 
 // CalculateHash 함수는 Transaction 고유의 Hash 값을 계산하여 반환한다.
+// TODO: Seal로 이름 변경.
 func (t DefaultTransaction) CalculateHash() ([]byte, error) {
+	// TODO: util에서 복사해오기.
 	serializedTx, error := util.Serialize(t)
 	if error != nil {
 		return nil, error
 	}
 
 	return calculateHash(serializedTx), nil
-}
-
-func calculateHash(b []byte) []byte {
-	hashValue := sha256.New()
-	hashValue.Write(b)
-	return hashValue.Sum(nil)
 }
 
 // NewDefaultTransaction 함수는 새로운 DefaultTransaction를 반환한다.

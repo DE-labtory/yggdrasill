@@ -1,20 +1,18 @@
 package impl
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/it-chain/yggdrasill/common"
-	tx "github.com/it-chain/yggdrasill/transaction"
 )
 
 type DefaultBlock struct {
 	seal       []byte
 	prevSeal   []byte
 	height     uint64
-	txList     []*tx.DefaultTransaction
+	txList     []*DefaultTransaction
 	txListSeal [][]byte
 	timestamp  []byte
 	CreatorID  string
@@ -41,11 +39,11 @@ func (block *DefaultBlock) SetHeight(height uint64) {
 	block.height = height
 }
 
-func (block *DefaultBlock) PutTx(transaction tx.Transaction) error {
-	convTx, ok := transaction.(*tx.DefaultTransaction)
+func (block *DefaultBlock) PutTx(transaction common.Transaction) error {
+	convTx, ok := transaction.(*DefaultTransaction)
 	if ok {
 		if block.txList == nil {
-			block.txList = make([]*tx.DefaultTransaction, 0)
+			block.txList = make([]*DefaultTransaction, 0)
 		}
 
 		block.txList = append(block.txList, convTx)
@@ -73,8 +71,8 @@ func (block *DefaultBlock) Height() uint64 {
 	return block.height
 }
 
-func (block *DefaultBlock) TxList() []tx.Transaction {
-	txList := make([]tx.Transaction, 0)
+func (block *DefaultBlock) TxList() []common.Transaction {
+	txList := make([]common.Transaction, 0)
 	for _, tx := range block.txList {
 		txList = append(txList, tx)
 	}
@@ -124,10 +122,4 @@ func (block *DefaultBlock) Timestamp() (time.Time, error) {
 	}
 
 	return time, nil
-}
-
-func calculateHash(b []byte) []byte {
-	hashValue := sha256.New()
-	hashValue.Write(b)
-	return hashValue.Sum(nil)
 }
