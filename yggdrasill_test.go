@@ -127,39 +127,42 @@ func TestYggdrasill_GetBlockByHeight(t *testing.T) {
 	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
 }
 
-// func TestYggdrasil_GetBlockBySeal(t *testing.T) {
+func TestYggdrasil_GetBlockBySeal(t *testing.T) {
 
-// 	dbPath := "./.db"
-// 	opts := map[string]interface{}{
-// 		"db_path": dbPath,
-// 	}
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
 
-// 	db := leveldbwrapper.CreateNewDB(dbPath)
-// 	y := NewYggdrasill(db, nil, opts)
-// 	defer func() {
-// 		y.Close()
-// 		os.RemoveAll(dbPath)
-// 	}()
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasill(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
 
-// 	for i := 0; i < 100; i++ {
-// 		tmpBlock := &impl.DefaultBlock{Header: &impl.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
-// 		if i > 0 {
-// 			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
-// 		}
+	prevSeal := []byte("genesis")
+	randomNumber := uint64(rand.Intn(100))
+	var testSeal []byte
+	for i := 0; i < 100; i++ {
+		tmpBlock := getNewBlock(prevSeal, uint64(i))
+		err := y.AddBlock(tmpBlock)
 
-// 		err := y.AddBlock(tmpBlock)
-// 		assert.NoError(t, err)
-// 	}
+		assert.NoError(t, err)
 
-// 	randomNumber := uint64(rand.Intn(100))
+		prevSeal = tmpBlock.GetSeal()
+		if uint64(i) == randomNumber {
+			testSeal = tmpBlock.GetSeal()
+		}
+	}
 
-// 	retrievedBlock := &impl.DefaultBlock{}
-// 	err := y.GetBlockBySeal(retrievedBlock, []byte(fmt.Sprintf("hash_%d", randomNumber)))
+	retrievedBlock := &impl.DefaultBlock{}
+	err := y.GetBlockBySeal(retrievedBlock, testSeal)
 
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
-// 	assert.Equal(t, fmt.Sprintf("test_%d", randomNumber), retrievedBlock.Header.CreatorID)
-// }
+	assert.NoError(t, err)
+	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
+	assert.Equal(t, testSeal, retrievedBlock.GetSeal())
+}
 
 // func TestYggdrasil_GetLastBlock(t *testing.T) {
 
