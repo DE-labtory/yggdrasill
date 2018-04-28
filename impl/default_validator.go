@@ -7,9 +7,6 @@ import (
 	"github.com/it-chain/yggdrasill/common"
 )
 
-// SerializationJoinStr 상수는 Serialize()에서 배열을 구성하는 각 해시값들을 Join 할 때 쓰는 구분값
-const SerializationJoinStr = " "
-
 // ErrHashCalculationFailed 변수는 Hash 계산 중 발생한 에러를 정의한다.
 var ErrHashCalculationFailed = errors.New("Hash Calculation Failed Error")
 
@@ -105,33 +102,26 @@ func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction comm
 
 // BuildSeal 함수는 block 객체를 받아서 Seal 값을 만들고, Seal 값을 반환한다.
 // 인풋 파라미터의 block에 자동으로 할당해주지는 않는다.
-func (t *DefaultValidator) BuildSeal(b common.Block) ([]byte, error) {
-	block, ok := b.(*DefaultBlock)
-	if ok {
-		timestamp, err := block.Timestamp.MarshalText()
-		if err != nil {
-			return nil, err
-		}
-		prevSeal, txListSeal, creator := block.PrevSeal, block.TxSeal, block.Creator
+func (t *DefaultValidator) BuildSeal(block common.Block) ([]byte, error) {
+	timestamp, err := block.GetTimestamp().MarshalText()
+	if err != nil {
+		return nil, err
+	}
+	prevSeal, txListSeal, creator := block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator()
 
-		if prevSeal == nil || txListSeal == nil || creator == nil {
-			return nil, common.ErrInsufficientFields
-		}
-
-		rootHash := txListSeal[0]
-		combined := append(prevSeal, rootHash...)
-		combined = append(combined, timestamp...)
-
-		seal := calculateHash(combined)
-		return seal, nil
+	if prevSeal == nil || txListSeal == nil || creator == nil {
+		return nil, common.ErrInsufficientFields
 	}
 
-	return nil, errors.New("Block format is wrong")
+	rootHash := txListSeal[0]
+	combined := append(prevSeal, rootHash...)
+	combined = append(combined, timestamp...)
+
+	seal := calculateHash(combined)
+	return seal, nil
 }
 
-// BuildTxSeal 는 DefaultTransaction 배열을 받아서 DefaultValidator 객체와 Proof를 생성하여 반환한다.
-// Proof는 주어진 txList의 위변조가 없다는 것을 증명할 []byte 값으로 DefaultValidator의 경우 루트 노드 값을 사용한다.
-// TxProof는 개별 transaction들 각각에 대한 Proof 리스트를 의미한다.
+// BuildTxSeal 함수는 Transaction 배열을 받아서 TxSeal을 생성하여 반환한다.
 func (t *DefaultValidator) BuildTxSeal(txList []common.Transaction) ([][]byte, error) {
 	leafNodeList := make([][]byte, 0)
 
