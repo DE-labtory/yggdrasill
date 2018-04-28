@@ -32,10 +32,6 @@ func (y *Yggdrasill) Close() {
 	y.DBProvider.Close()
 }
 
-func (y *Yggdrasill) createGenesisBlock() {
-
-}
-
 func (y *Yggdrasill) AddBlock(block common.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
