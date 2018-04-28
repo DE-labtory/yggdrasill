@@ -3,8 +3,6 @@ package impl
 import (
 	"encoding/json"
 	"time"
-
-	"github.com/it-chain/yggdrasill/util"
 )
 
 // Status 변수는 Transaction의 상태를 Unconfirmed, Confirmed, Unknown 중 하나로 표현함.
@@ -60,12 +58,10 @@ func (t *DefaultTransaction) GetID() string {
 }
 
 // CalculateSeal 함수는 Transaction 고유의 Hash 값을 계산하여 반환한다.
-// TODO: Seal로 이름 변경.
 func (t *DefaultTransaction) CalculateSeal() ([]byte, error) {
-	// TODO: util에서 복사해오기.
-	serializedTx, error := util.Serialize(t)
-	if error != nil {
-		return nil, error
+	serializedTx, err := json.Marshal(t)
+	if err != nil {
+		return nil, err
 	}
 
 	return calculateHash(serializedTx), nil
