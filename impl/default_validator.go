@@ -105,24 +105,28 @@ func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction comm
 
 // BuildSeal 함수는 block 객체를 받아서 Seal 값을 만들고, Seal 값을 반환한다.
 // 인풋 파라미터의 block에 자동으로 할당해주지는 않는다.
-func (t *DefaultValidator) BuildSeal(block common.Block) ([]byte, error) {
-	timestamp, err := getTimestampByte(block)
-	if err != nil {
-		return nil, err
+func (t *DefaultValidator) BuildSeal(b common.Block) ([]byte, error) {
+	block, ok := b.(*DefaultBlock)
+	if ok {
+		timestamp, err := block.Timestamp.MarshalText()
+		if err != nil {
+			return nil, err
+		}
+		prevSeal, txListSeal, creator := block.PrevSeal, block.TxSeal, block.Creator
+
+		if prevSeal == nil || txListSeal == nil || creator == nil {
+			return nil, common.ErrInsufficientFields
+		}
+
+		rootHash := txListSeal[0]
+		combined := append(prevSeal, rootHash...)
+		combined = append(combined, timestamp...)
+
+		seal := calculateHash(combined)
+		return seal, nil
 	}
 
-	prevSeal, txListSeal, creator := block.PrevSeal(), block.TxSeal(), block.Creator()
-
-	if prevSeal == nil || txListSeal == nil || creator == nil {
-		return nil, common.ErrInsufficientFields
-	}
-
-	rootHash := txListSeal[0]
-	combined := append(prevSeal, rootHash...)
-	combined = append(combined, timestamp...)
-
-	seal := calculateHash(combined)
-	return seal, nil
+	return nil, errors.New("Block format is wrong")
 }
 
 // BuildTxSeal 는 DefaultTransaction 배열을 받아서 DefaultValidator 객체와 Proof를 생성하여 반환한다.
@@ -180,18 +184,4 @@ func calculateIntermediateNodeHash(leftHash []byte, rightHash []byte) []byte {
 	combinedHash := append(leftHash, rightHash...)
 
 	return calculateHash(combinedHash)
-}
-
-func getTimestampByte(block common.Block) ([]byte, error) {
-	timestamp, err := block.Timestamp()
-	if err != nil {
-		return nil, err
-	}
-
-	byteTimestamp, err := timestamp.MarshalBinary()
-	if err != nil {
-		return nil, err
-	}
-
-	return byteTimestamp, nil
 }
