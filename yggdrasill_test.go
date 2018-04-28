@@ -164,37 +164,42 @@ func TestYggdrasil_GetBlockBySeal(t *testing.T) {
 	assert.Equal(t, testSeal, retrievedBlock.GetSeal())
 }
 
-// func TestYggdrasil_GetLastBlock(t *testing.T) {
+func TestYggdrasil_GetLastBlock(t *testing.T) {
 
-// 	dbPath := "./.db"
-// 	opts := map[string]interface{}{
-// 		"db_path": dbPath,
-// 	}
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
 
-// 	db := leveldbwrapper.CreateNewDB(dbPath)
-// 	y := NewYggdrasill(db, nil, opts)
-// 	defer func() {
-// 		y.Close()
-// 		os.RemoveAll(dbPath)
-// 	}()
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasill(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
 
-// 	for i := 0; i < 100; i++ {
-// 		tmpBlock := &impl.DefaultBlock{Header: &impl.BlockHeader{Height: uint64(i), CreatorID: fmt.Sprintf("test_%d", i), BlockHash: fmt.Sprintf("hash_%d", i)}}
-// 		if i > 0 {
-// 			tmpBlock.Header.PreviousHash = fmt.Sprintf("hash_%d", i-1)
-// 		}
+	prevSeal := []byte("genesis")
+	var lastSeal []byte
+	for i := 0; i < 100; i++ {
+		tmpBlock := getNewBlock(prevSeal, uint64(i))
+		err := y.AddBlock(tmpBlock)
 
-// 		err := y.AddBlock(tmpBlock)
-// 		assert.NoError(t, err)
-// 	}
+		assert.NoError(t, err)
 
-// 	retrievedBlock := &impl.DefaultBlock{}
-// 	err := y.GetLastBlock(retrievedBlock)
+		prevSeal = tmpBlock.GetSeal()
 
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, uint64(99), retrievedBlock.GetHeight())
-// 	assert.Equal(t, "test_99", retrievedBlock.Header.CreatorID)
-// }
+		if i == 99 {
+			lastSeal = tmpBlock.GetSeal()
+		}
+	}
+
+	retrievedBlock := &impl.DefaultBlock{}
+	err := y.GetLastBlock(retrievedBlock)
+
+	assert.NoError(t, err)
+	assert.Equal(t, uint64(99), retrievedBlock.GetHeight())
+	assert.Equal(t, lastSeal, retrievedBlock.GetSeal())
+}
 
 // func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 
