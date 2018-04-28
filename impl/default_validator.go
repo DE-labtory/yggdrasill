@@ -1,11 +1,10 @@
-package validator
+package impl
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"errors"
 
-	tx "github.com/it-chain/yggdrasill/transaction"
+	"github.com/it-chain/yggdrasill/common"
 )
 
 // SerializationJoinStr 상수는 Serialize()에서 배열을 구성하는 각 해시값들을 Join 할 때 쓰는 구분값
@@ -23,7 +22,7 @@ func (t *MerkleTree) ValidateProof(proof []byte, comparisonProof []byte) bool {
 }
 
 // ValidateTxProof 함수는 주어진 Transaction 리스트에 따라 주어진 MerkleTree 전체(proof)를 검증함.
-func (t *MerkleTree) ValidateTxProof(txProof [][]byte, txList []tx.Transaction) (bool, error) {
+func (t *MerkleTree) ValidateTxProof(txProof [][]byte, txList []common.Transaction) (bool, error) {
 	leafNodeIndex := 0
 	for i, n := range txProof {
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
@@ -52,7 +51,7 @@ func (t *MerkleTree) ValidateTxProof(txProof [][]byte, txList []tx.Transaction) 
 }
 
 // ValidateTransaction 함수는 주어진 Transaction이 이 merkletree(txProof)에 올바로 있는지를 확인한다.
-func (t *MerkleTree) ValidateTransaction(txProof [][]byte, tx tx.Transaction) (bool, error) {
+func (t *MerkleTree) ValidateTransaction(txProof [][]byte, tx common.Transaction) (bool, error) {
 	hash, error := tx.CalculateHash()
 	if error != nil {
 		return false, error
@@ -102,7 +101,7 @@ func (t *MerkleTree) ValidateTransaction(txProof [][]byte, tx tx.Transaction) (b
 // BuildProofAndTxProof 는 DefaultTransaction 배열을 받아서 MerkleTree 객체와 Proof를 생성하여 반환한다.
 // Proof는 주어진 txList의 위변조가 없다는 것을 증명할 []byte 값으로 MerkleTree의 경우 루트 노드 값을 사용한다.
 // TxProof는 개별 transaction들 각각에 대한 Proof 리스트를 의미한다.
-func (t *MerkleTree) BuildProofAndTxProof(txList []tx.Transaction) ([]byte, [][]byte, error) {
+func (t *MerkleTree) BuildProofAndTxProof(txList []common.Transaction) ([]byte, [][]byte, error) {
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
@@ -154,10 +153,4 @@ func calculateIntermediateNodeHash(leftHash []byte, rightHash []byte) []byte {
 	combinedHash := append(leftHash, rightHash...)
 
 	return calculateHash(combinedHash)
-}
-
-func calculateHash(b []byte) []byte {
-	hashValue := sha256.New()
-	hashValue.Write(b)
-	return hashValue.Sum(nil)
 }

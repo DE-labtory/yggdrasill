@@ -1,10 +1,10 @@
-package validator
+package impl
 
 import (
 	"testing"
 	"time"
 
-	tx "github.com/it-chain/yggdrasill/transaction"
+	"github.com/it-chain/yggdrasill/common"
 )
 
 func TestMerkleTree_BuildProofAndTxProof(t *testing.T) {
@@ -12,7 +12,7 @@ func TestMerkleTree_BuildProofAndTxProof(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		txList    []*tx.DefaultTransaction
+		txList    []*DefaultTransaction
 		wantProof []byte
 		wantErr   bool
 	}{
@@ -64,15 +64,15 @@ func TestMerkleTree_ValidateTxProof(t *testing.T) {
 
 func TestMerkleTree_ValidateTransaction(t *testing.T) {
 	notIncludedTxTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (PST)")
-	notIncludedTx := &tx.DefaultTransaction{
+	notIncludedTx := &DefaultTransaction{
 		PeerID:    "p05",
 		ID:        "tx05",
 		Status:    0,
 		Timestamp: notIncludedTxTime,
-		TxData: &tx.TxData{
+		TxData: &TxData{
 			Jsonrpc: "jsonRPC05",
 			Method:  "invoke",
-			Params: tx.Params{
+			Params: Params{
 				Type:     0,
 				Function: "function05",
 				Args:     []string{"arg1", "arg2"},
@@ -86,7 +86,7 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 
 	tests := []struct {
 		name string
-		t    *tx.DefaultTransaction
+		t    *DefaultTransaction
 		want bool
 	}{
 		{
@@ -109,21 +109,21 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 	}
 }
 
-func getTestingData(index int) []*tx.DefaultTransaction {
+func getTestingData(index int) []*DefaultTransaction {
 	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
 	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
 
-	return [][]*tx.DefaultTransaction{
-		[]*tx.DefaultTransaction{
-			&tx.DefaultTransaction{
+	return [][]*DefaultTransaction{
+		[]*DefaultTransaction{
+			&DefaultTransaction{
 				PeerID:    "p01",
 				ID:        "tx01",
 				Status:    0,
 				Timestamp: testingTime,
-				TxData: &tx.TxData{
+				TxData: &TxData{
 					Jsonrpc: "jsonRPC01",
 					Method:  "invoke",
-					Params: tx.Params{
+					Params: Params{
 						Type:     0,
 						Function: "function01",
 						Args:     []string{"arg1", "arg2"},
@@ -131,15 +131,15 @@ func getTestingData(index int) []*tx.DefaultTransaction {
 					ID: "txdata01",
 				},
 			},
-			&tx.DefaultTransaction{
+			&DefaultTransaction{
 				PeerID:    "p02",
 				ID:        "tx02",
 				Status:    0,
 				Timestamp: testingTime,
-				TxData: &tx.TxData{
+				TxData: &TxData{
 					Jsonrpc: "jsonRPC02",
 					Method:  "invoke",
-					Params: tx.Params{
+					Params: Params{
 						Type:     0,
 						Function: "function02",
 						Args:     []string{"arg1", "arg2"},
@@ -147,15 +147,15 @@ func getTestingData(index int) []*tx.DefaultTransaction {
 					ID: "txdata02",
 				},
 			},
-			&tx.DefaultTransaction{
+			&DefaultTransaction{
 				PeerID:    "p03",
 				ID:        "tx03",
 				Status:    0,
 				Timestamp: testingTime,
-				TxData: &tx.TxData{
+				TxData: &TxData{
 					Jsonrpc: "jsonRPC03",
 					Method:  "invoke",
-					Params: tx.Params{
+					Params: Params{
 						Type:     0,
 						Function: "function03",
 						Args:     []string{"arg1", "arg2"},
@@ -163,15 +163,15 @@ func getTestingData(index int) []*tx.DefaultTransaction {
 					ID: "txdata03",
 				},
 			},
-			&tx.DefaultTransaction{
+			&DefaultTransaction{
 				PeerID:    "p04",
 				ID:        "tx04",
 				Status:    0,
 				Timestamp: testingTime,
-				TxData: &tx.TxData{
+				TxData: &TxData{
 					Jsonrpc: "jsonRPC04",
 					Method:  "invoke",
-					Params: tx.Params{
+					Params: Params{
 						Type:     0,
 						Function: "function04",
 						Args:     []string{"arg1", "arg2"},
@@ -183,8 +183,8 @@ func getTestingData(index int) []*tx.DefaultTransaction {
 	}[index]
 }
 
-func convertType(txList []*tx.DefaultTransaction) []tx.Transaction {
-	convTxList := make([]tx.Transaction, 0)
+func convertType(txList []*DefaultTransaction) []common.Transaction {
+	convTxList := make([]common.Transaction, 0)
 	for _, tx := range txList {
 		convTxList = append(convTxList, tx)
 	}
