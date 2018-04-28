@@ -10,7 +10,7 @@ import (
 
 const (
 	BLOCK_HASH_DB   = "block_hash"
-	BLOCK_NUMBER_DB = "block_number"
+	BLOCK_HEIGHT_DB = "block_height"
 	TRANSACTION_DB  = "transaction"
 	UTIL_DB         = "util"
 	LAST_BLOCK_KEY  = "last_block"
@@ -51,7 +51,7 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 	}
 
 	blockHashDB := y.DBProvider.GetDBHandle(BLOCK_HASH_DB)
-	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
+	blockHeightDB := y.DBProvider.GetDBHandle(BLOCK_HEIGHT_DB)
 	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
 
 	err = blockHashDB.Put(block.GetSeal(), serializedBlock, true)
@@ -59,7 +59,7 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 		return err
 	}
 
-	err = blockNumberDB.Put([]byte(fmt.Sprint(block.GetHeight())), block.GetSeal(), true)
+	err = blockHeightDB.Put([]byte(fmt.Sprint(block.GetHeight())), block.GetSeal(), true)
 	if err != nil {
 		return err
 	}
@@ -89,10 +89,10 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 	return nil
 }
 
-func (y *Yggdrasill) GetBlockByNumber(block common.Block, height uint64) error {
-	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
+func (y *Yggdrasill) GetBlockByHeight(block common.Block, height uint64) error {
+	blockHeightDB := y.DBProvider.GetDBHandle(BLOCK_HEIGHT_DB)
 
-	blockHash, err := blockNumberDB.Get([]byte(fmt.Sprint(height)))
+	blockHash, err := blockHeightDB.Get([]byte(fmt.Sprint(height)))
 	if err != nil {
 		return err
 	}

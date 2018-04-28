@@ -125,7 +125,7 @@ func TestYggDrasill_AddBlock3(t *testing.T) {
 // 	randomNumber := uint64(rand.Intn(100))
 
 // 	retrievedBlock := &impl.DefaultBlock{}
-// 	err := y.GetBlockByNumber(retrievedBlock, randomNumber)
+// 	err := y.GetBlockByHeight(retrievedBlock, randomNumber)
 
 // 	assert.NoError(t, err)
 // 	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
