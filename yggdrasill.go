@@ -126,10 +126,10 @@ func (y *Yggdrasill) GetLastBlock(block common.Block) error {
 	return err
 }
 
-func (y *Yggdrasill) GetTransactionByTxID(transaction common.Transaction, txid string) error {
+func (y *Yggdrasill) GetTransactionByTxID(transaction common.Transaction, txID string) error {
 	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
 
-	serializedTX, err := transactionDB.Get([]byte(txid))
+	serializedTX, err := transactionDB.Get([]byte(txID))
 	if err != nil {
 		return err
 	}
