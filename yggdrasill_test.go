@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestYggDrasill_AddBlock(t *testing.T) {
+func TestYggdrasill_AddBlock(t *testing.T) {
 
 	dbPath := "./.db"
 	opts := map[string]interface{}{
@@ -44,7 +44,7 @@ func TestYggDrasill_AddBlock(t *testing.T) {
 	//fmt.Print(lastBlock)
 }
 
-func TestYggDrasill_AddBlock2(t *testing.T) {
+func TestYggdrasill_AddBlock2(t *testing.T) {
 
 	dbPath := "./.db"
 	opts := map[string]interface{}{
@@ -70,7 +70,7 @@ func TestYggDrasill_AddBlock2(t *testing.T) {
 }
 
 // PrevSeal 값을 잘못 입력해서 에러를 출력.
-func TestYggDrasill_AddBlock3(t *testing.T) {
+func TestYggdrasill_AddBlock3(t *testing.T) {
 
 	dbPath := "./.db"
 	opts := map[string]interface{}{
