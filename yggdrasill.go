@@ -40,14 +40,14 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
 	// TODO: Check the last block
-	// lastBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
-	// if err != nil {
-	// 	return err
-	// }
+	lastBlockByte, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
+	if err != nil {
+		return err
+	}
 
-	// if lastBlock != nil && !block.IsPrev(lastBlock) {
-	// 	return NewBlockError("height or prevHash is not matched")
-	// }
+	if lastBlockByte != nil && !block.IsPrev(lastBlockByte) {
+		return NewBlockError("height or prevHash is not matched")
+	}
 
 	serializedBlock, err := block.Serialize()
 	if err != nil {

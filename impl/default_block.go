@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"bytes"
+
 	"github.com/it-chain/yggdrasill/common"
 )
 
@@ -111,6 +113,13 @@ func (block *DefaultBlock) Deserialize(serializedBlock []byte) error {
 
 func (block *DefaultBlock) IsReadyToPublish() bool {
 	return block.Seal != nil
+}
+
+func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
+	prevBlock := &DefaultBlock{}
+	prevBlock.Deserialize(serializedPrevBlock)
+
+	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
 func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {

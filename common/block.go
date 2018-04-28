@@ -35,4 +35,5 @@ type Block interface {
 
 	// Block 상태 체크 함수
 	IsReadyToPublish() bool
+	IsPrev(serializedPrevBlock []byte) bool
 }
