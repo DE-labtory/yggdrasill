@@ -7,7 +7,7 @@ import (
 	"github.com/it-chain/yggdrasill/common"
 )
 
-func TestMerkleTree_BuildProofAndTxProof(t *testing.T) {
+func TestDefaultValidator_BuildProofAndTxProof(t *testing.T) {
 	testData := getTestingData(0)
 
 	tests := []struct {
@@ -25,22 +25,22 @@ func TestMerkleTree_BuildProofAndTxProof(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			merkleTree := &MerkleTree{}
+			merkleTree := &DefaultValidator{}
 			gotProof, _, err := merkleTree.BuildProofAndTxProof(convertType(tt.txList))
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NewMerkleTree() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("NewDefaultValidator() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !merkleTree.ValidateProof(gotProof, tt.wantProof) {
-				t.Errorf("NewMerkleTree() = %v, want %v", gotProof, tt.wantProof)
+				t.Errorf("NewDefaultValidator() = %v, want %v", gotProof, tt.wantProof)
 			}
 		})
 	}
 }
 
-func TestMerkleTree_ValidateTxProof(t *testing.T) {
+func TestDefaultValidator_ValidateTxProof(t *testing.T) {
 	testData := getTestingData(0)
-	merkleTree := &MerkleTree{}
+	merkleTree := &DefaultValidator{}
 	_, tree, _ := merkleTree.BuildProofAndTxProof(convertType(testData))
 	convTestData := convertType(testData)
 
@@ -56,13 +56,13 @@ func TestMerkleTree_ValidateTxProof(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got, _ := merkleTree.ValidateTxProof(tree, convTestData); got != tt.want {
-				t.Errorf("MerkleTree.ValidateTxProof() = %v, want %v", got, tt.want)
+				t.Errorf("DefaultValidator.ValidateTxProof() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestMerkleTree_ValidateTransaction(t *testing.T) {
+func TestDefaultValidator_ValidateTransaction(t *testing.T) {
 	notIncludedTxTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (PST)")
 	notIncludedTx := &DefaultTransaction{
 		PeerID:    "p05",
@@ -81,7 +81,7 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 		},
 	}
 	testData := getTestingData(0)
-	merkleTree := &MerkleTree{}
+	merkleTree := &DefaultValidator{}
 	_, tree, _ := merkleTree.BuildProofAndTxProof(convertType(testData))
 
 	tests := []struct {
@@ -103,7 +103,7 @@ func TestMerkleTree_ValidateTransaction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got, _ := merkleTree.ValidateTransaction(tree, tt.t); got != tt.want {
-				t.Errorf("MerkleTree.ValidateTransaction() = %v, want %v", got, tt.want)
+				t.Errorf("DefaultValidator.ValidateTransaction() = %v, want %v", got, tt.want)
 			}
 		})
 	}
