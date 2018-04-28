@@ -1,7 +1,6 @@
 package impl
 
 import (
-	"bytes"
 	"testing"
 	"time"
 
@@ -9,60 +8,24 @@ import (
 )
 
 func TestNewDefaultTransaction(t *testing.T) {
-	testData := getTestData()
 	testingTime := getTestingTime()
+	params := NewParams(1, "functionName", make([]string, 0))
+	txData := NewTxData("jsonrpc", Invoke, params, "contractID01")
+	tx := NewDefaultTransaction("peerID01", "transactionID01", testingTime, txData)
+	expectedByte := []byte{123, 34, 73, 68, 34, 58, 34, 116, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 68, 48, 49, 34, 44, 34, 83, 116, 97, 116, 117, 115, 34, 58, 48, 44, 34, 80, 101, 101, 114, 73, 68, 34, 58, 34, 112, 101, 101, 114, 73, 68, 48, 49, 34, 44, 34, 84, 105, 109, 101, 115, 116, 97, 109, 112, 34, 58, 34, 50, 48, 49, 51, 45, 48, 50, 45, 48, 51, 84, 49, 57, 58, 53, 52, 58, 48, 48, 90, 34, 44, 34, 84, 120, 68, 97, 116, 97, 34, 58, 123, 34, 74, 115, 111, 110, 114, 112, 99, 34, 58, 34, 106, 115, 111, 110, 114, 112, 99, 34, 44, 34, 77, 101, 116, 104, 111, 100, 34, 58, 34, 105, 110, 118, 111, 107, 101, 34, 44, 34, 80, 97, 114, 97, 109, 115, 34, 58, 123, 34, 84, 121, 112, 101, 34, 58, 49, 44, 34, 70, 117, 110, 99, 116, 105, 111, 110, 34, 58, 34, 102, 117, 110, 99, 116, 105, 111, 110, 78, 97, 109, 101, 34, 44, 34, 65, 114, 103, 115, 34, 58, 91, 93, 125, 44, 34, 73, 68, 34, 58, 34, 99, 111, 110, 116, 114, 97, 99, 116, 73, 68, 48, 49, 34, 125, 125}
 
-	test := struct {
-		name         string
-		expectedTx   *DefaultTransaction
-		expectedByte []byte
-		want         bool
-	}{
-		name:         "Test NewDefaultTransaction",
-		expectedTx:   testData,
-		expectedByte: []byte{123, 34, 73, 68, 34, 58, 34, 116, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 68, 48, 49, 34, 44, 34, 83, 116, 97, 116, 117, 115, 34, 58, 48, 44, 34, 80, 101, 101, 114, 73, 68, 34, 58, 34, 112, 101, 101, 114, 73, 68, 48, 49, 34, 44, 34, 84, 105, 109, 101, 115, 116, 97, 109, 112, 34, 58, 34, 50, 48, 49, 51, 45, 48, 50, 45, 48, 51, 84, 49, 57, 58, 53, 52, 58, 48, 48, 90, 34, 44, 34, 84, 120, 68, 97, 116, 97, 34, 58, 123, 34, 74, 115, 111, 110, 114, 112, 99, 34, 58, 34, 106, 115, 111, 110, 114, 112, 99, 34, 44, 34, 77, 101, 116, 104, 111, 100, 34, 58, 34, 105, 110, 118, 111, 107, 101, 34, 44, 34, 80, 97, 114, 97, 109, 115, 34, 58, 123, 34, 84, 121, 112, 101, 34, 58, 49, 44, 34, 70, 117, 110, 99, 116, 105, 111, 110, 34, 58, 34, 102, 117, 110, 99, 116, 105, 111, 110, 78, 97, 109, 101, 34, 44, 34, 65, 114, 103, 115, 34, 58, 91, 93, 125, 44, 34, 73, 68, 34, 58, 34, 99, 111, 110, 116, 114, 97, 99, 116, 73, 68, 48, 49, 34, 125, 125},
-		want:         true,
-	}
-
-	t.Run(test.name, func(t *testing.T) {
-		params := NewParams(1, "functionName", make([]string, 0))
-		txData := NewTxData("jsonrpc", Invoke, params, "contractID01")
-		tx := NewDefaultTransaction("peerID01", "transactionID01", testingTime, txData)
-
-		if got, _ := tx.Serialize(); bytes.Compare(got, test.expectedByte) != 0 {
-			t.Errorf("NewDefaultTransaction() = %v, want %v", got, test.expectedByte)
-		}
-	})
+	serializedTx, err := tx.Serialize()
+	assert.NoError(t, err)
+	assert.Equal(t, serializedTx, expectedByte)
 }
 
 func TestDefaultTransaction_CalculateSeal(t *testing.T) {
-	testData := getTestData()
+	tx := getTestData()
+	expectedSeal := []byte{160, 111, 85, 201, 10, 162, 8, 252, 84, 135, 199, 9, 109, 167, 73, 32, 140, 84, 200, 238, 251, 38, 41, 8, 189, 128, 188, 43, 32, 172, 58, 120}
+	seal, err := tx.CalculateSeal()
+	assert.NoError(t, err)
 
-	tests := []struct {
-		name    string
-		tx      *DefaultTransaction
-		want    []byte
-		wantErr bool
-	}{
-		{
-			name:    "Test CalculateSeal",
-			tx:      testData,
-			want:    []byte{160, 111, 85, 201, 10, 162, 8, 252, 84, 135, 199, 9, 109, 167, 73, 32, 140, 84, 200, 238, 251, 38, 41, 8, 189, 128, 188, 43, 32, 172, 58, 120},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.tx.CalculateSeal()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("DefaultTransaction.CalculateSeal() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if bytes.Compare(got, tt.want) != 0 {
-				t.Errorf("DefaultTransaction.CalculateSeal() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	assert.Equal(t, expectedSeal, seal)
 }
 
 func TestDefaultTransaction_Serialize(t *testing.T) {

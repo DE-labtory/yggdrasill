@@ -1,7 +1,6 @@
 package impl
 
 import (
-	"bytes"
 	"testing"
 	"time"
 
@@ -12,30 +11,18 @@ func TestNewEmptyBlock(t *testing.T) {
 	block := getNewBlock()
 
 	expected := []byte{170, 156, 92, 136, 64, 227, 248, 194, 78, 168, 107, 144, 205, 66, 234, 40, 204, 27, 117, 52, 199, 24, 32, 245, 115, 97, 146, 217, 14, 104, 227, 165}
-	t.Run("Creating new block", func(t *testing.T) {
-		if bytes.Compare(block.Seal, expected) != 0 {
-			t.Errorf("Seal = %v, want %v", block.Seal, expected)
-		}
-	})
+	assert.Equal(t, block.GetSeal(), expected)
 }
 
 func TestSerializeAndDeserialize(t *testing.T) {
 	block := getNewBlock()
 
 	serializedBlock, err := block.Serialize()
-	if err != nil {
-		t.Errorf("Serialize error=%v", err)
-	}
+	assert.NoError(t, err)
 
 	deserializedBlock := &DefaultBlock{}
 	err = deserializedBlock.Deserialize(serializedBlock)
-	if err != nil {
-		t.Errorf("Deserialize error=%v", err)
-	}
-
-	if bytes.Compare(deserializedBlock.Seal, block.Seal) != 0 {
-		t.Errorf("Failed to deserialize correctly.")
-	}
+	assert.NoError(t, err)
 
 	assert.Equal(t, deserializedBlock, block)
 }
@@ -64,7 +51,7 @@ func getNewBlock() *DefaultBlock {
 
 func getTxList(testingTime time.Time) []*DefaultTransaction {
 	return []*DefaultTransaction{
-		&DefaultTransaction{
+		{
 			PeerID:    "p01",
 			ID:        "tx01",
 			Status:    0,
@@ -80,7 +67,7 @@ func getTxList(testingTime time.Time) []*DefaultTransaction {
 				ID: "txdata01",
 			},
 		},
-		&DefaultTransaction{
+		{
 			PeerID:    "p02",
 			ID:        "tx02",
 			Status:    0,
@@ -96,7 +83,7 @@ func getTxList(testingTime time.Time) []*DefaultTransaction {
 				ID: "txdata02",
 			},
 		},
-		&DefaultTransaction{
+		{
 			PeerID:    "p03",
 			ID:        "tx03",
 			Status:    0,
@@ -112,7 +99,7 @@ func getTxList(testingTime time.Time) []*DefaultTransaction {
 				ID: "txdata03",
 			},
 		},
-		&DefaultTransaction{
+		{
 			PeerID:    "p04",
 			ID:        "tx04",
 			Status:    0,

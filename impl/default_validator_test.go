@@ -1,64 +1,33 @@
 package impl
 
 import (
-	"bytes"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultValidator_BuildTxSeal(t *testing.T) {
 	testData := getTestingData(0)
+	expectedTxSealRoot := []byte{119, 178, 207, 195, 123, 230, 211, 193, 142, 68, 255, 99, 226, 172, 207, 211, 75, 251, 211, 128, 175, 230, 141, 51, 3, 186, 19, 179, 197, 104, 230, 29}
 
-	tests := []struct {
-		name      string
-		txList    []*DefaultTransaction
-		wantProof []byte
-		wantErr   bool
-	}{
-		{
-			name:      "Create new merkle tree",
-			txList:    testData,
-			wantProof: []byte{119, 178, 207, 195, 123, 230, 211, 193, 142, 68, 255, 99, 226, 172, 207, 211, 75, 251, 211, 128, 175, 230, 141, 51, 3, 186, 19, 179, 197, 104, 230, 29},
-			wantErr:   false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			validator := &DefaultValidator{}
-			gotTxSeal, err := validator.BuildTxSeal(convertType(tt.txList))
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewDefaultValidator() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if bytes.Compare(gotTxSeal[0], tt.wantProof) != 0 {
-				t.Errorf("NewDefaultValidator() = %v, want %v", gotTxSeal, tt.wantProof)
-			}
-		})
-	}
+	validator := &DefaultValidator{}
+	gotTxSeal, err := validator.BuildTxSeal(convertType(testData))
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedTxSealRoot, gotTxSeal[0])
 }
 
 func TestDefaultValidator_ValidateTxProof(t *testing.T) {
 	testData := getTestingData(0)
 	validator := &DefaultValidator{}
-	txSeal, _ := validator.BuildTxSeal(convertType(testData))
 	convTestData := convertType(testData)
 
-	tests := []struct {
-		name string
-		want bool
-	}{
-		{
-			name: "Test correct validation",
-			want: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := validator.ValidateTxSeal(txSeal, convTestData); got != tt.want {
-				t.Errorf("DefaultValidator.ValidateTxProof() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	txSeal, err := validator.BuildTxSeal(convTestData)
+	assert.NoError(t, err)
+
+	validationResult, err := validator.ValidateTxSeal(txSeal, convTestData)
+	assert.Equal(t, true, validationResult)
 }
 
 func TestDefaultValidator_ValidateTransaction(t *testing.T) {
@@ -81,31 +50,16 @@ func TestDefaultValidator_ValidateTransaction(t *testing.T) {
 	}
 	testData := getTestingData(0)
 	validator := &DefaultValidator{}
-	txSeal, _ := validator.BuildTxSeal(convertType(testData))
+	txSeal, err := validator.BuildTxSeal(convertType(testData))
+	assert.NoError(t, err)
 
-	tests := []struct {
-		name string
-		t    *DefaultTransaction
-		want bool
-	}{
-		{
-			name: "Test true ValidationTransaction",
-			t:    testData[1],
-			want: true,
-		},
-		{
-			name: "Test false ValidationTransaction",
-			t:    notIncludedTx,
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := validator.ValidateTransaction(txSeal, tt.t); got != tt.want {
-				t.Errorf("DefaultValidator.ValidateTransaction() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	correctResult, err := validator.ValidateTransaction(txSeal, testData[1])
+	assert.NoError(t, err)
+	assert.Equal(t, true, correctResult)
+
+	wrongResult, err := validator.ValidateTransaction(txSeal, notIncludedTx)
+	assert.NoError(t, err)
+	assert.Equal(t, false, wrongResult)
 }
 
 func getTestingData(index int) []*DefaultTransaction {
@@ -113,7 +67,7 @@ func getTestingData(index int) []*DefaultTransaction {
 	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
 
 	return [][]*DefaultTransaction{
-		[]*DefaultTransaction{
+		{
 			&DefaultTransaction{
 				PeerID:    "p01",
 				ID:        "tx01",
