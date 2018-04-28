@@ -5,7 +5,6 @@ import (
 
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
 	"github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/yggdrasill/util"
 )
 
 const (
@@ -133,8 +132,7 @@ func (y *Yggdrasill) GetTransactionByTxID(transaction common.Transaction, txID s
 		return err
 	}
 
-	// TODO: add deserialize function to transaction
-	err = util.Deserialize(serializedTX, transaction)
+	err = transaction.Deserialize(serializedTX)
 
 	return err
 }
