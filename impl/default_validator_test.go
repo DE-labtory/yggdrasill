@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"testing"
 	"time"
-
-	"github.com/it-chain/yggdrasill/common"
 )
 
 func TestDefaultValidator_BuildTxSeal(t *testing.T) {
@@ -182,13 +180,4 @@ func getTestingData(index int) []*DefaultTransaction {
 			},
 		},
 	}[index]
-}
-
-func convertType(txList []*DefaultTransaction) []common.Transaction {
-	convTxList := make([]common.Transaction, 0)
-	for _, tx := range txList {
-		convTxList = append(convTxList, tx)
-	}
-
-	return convTxList
 }

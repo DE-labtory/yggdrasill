@@ -12,7 +12,7 @@ var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
 // Block 인터페이스는 Block이 기본적으로 가져야 하는 기능들을 정의한다.
 type Block interface {
 	// Block의 required field setters
-	SetSeal(seal []byte) ([]byte, error)
+	SetSeal(seal []byte)
 	SetPrevSeal(prevSeal []byte)
 	SetHeight(height uint64)
 	PutTx(tx Transaction) error
