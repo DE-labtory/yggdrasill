@@ -201,73 +201,67 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 	assert.Equal(t, lastSeal, retrievedBlock.GetSeal())
 }
 
-// func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
+func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 
-// 	//given
-// 	dbPath := "./.db"
-// 	opts := map[string]interface{}{
-// 		"db_path": dbPath,
-// 	}
+	//given
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
 
-// 	db := leveldbwrapper.CreateNewDB(dbPath)
-// 	y := NewYggdrasill(db, nil, opts)
-// 	defer func() {
-// 		y.Close()
-// 		os.RemoveAll(dbPath)
-// 	}()
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasill(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
 
-// 	firstBlock := &impl.DefaultBlock{Header: &impl.BlockHeader{Height: 0, CreatorID: "test"}}
-// 	tx := &transaction.DefaultTransaction{TransactionID: "123"}
-// 	err := firstBlock.PutTransaction(tx)
-// 	assert.NoError(t, err)
+	firstBlock := getNewBlock([]byte("genesis"), 0)
 
-// 	err = y.AddBlock(firstBlock)
-// 	assert.NoError(t, err)
+	err := y.AddBlock(firstBlock)
+	assert.NoError(t, err)
 
-// 	//when
-// 	retrievedTx := &transaction.DefaultTransaction{}
-// 	err = y.GetTransactionByTxID(retrievedTx, tx.TransactionID)
-// 	assert.NoError(t, err)
+	//when
+	retrievedTx := &impl.DefaultTransaction{}
+	err = y.GetTransactionByTxID(retrievedTx, "tx01")
+	assert.NoError(t, err)
 
-// 	//then
-// 	assert.Equal(t, retrievedTx, tx)
-// }
+	//then
+	assert.Equal(t, retrievedTx, getTxList(getTime())[0])
+}
 
-// func TestYggdrasil_GetBlockByTxID(t *testing.T) {
+func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 
-// 	//given
-// 	dbPath := "./.db"
-// 	opts := map[string]interface{}{
-// 		"db_path": dbPath,
-// 	}
+	//given
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
 
-// 	db := leveldbwrapper.CreateNewDB(dbPath)
-// 	y := NewYggdrasill(db, nil, opts)
-// 	defer func() {
-// 		y.Close()
-// 		os.RemoveAll(dbPath)
-// 	}()
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasill(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
 
-// 	firstBlock := &impl.DefaultBlock{Header: &impl.BlockHeader{Height: 0, CreatorID: "test"}}
-// 	tx := &transaction.DefaultTransaction{TransactionID: "123"}
-// 	err := firstBlock.PutTransaction(tx)
-// 	assert.NoError(t, err)
+	firstBlock := getNewBlock([]byte("genesis"), 0)
 
-// 	err = y.AddBlock(firstBlock)
-// 	assert.NoError(t, err)
+	err := y.AddBlock(firstBlock)
+	assert.NoError(t, err)
 
-// 	//when
-// 	retrievedBlock := &impl.DefaultBlock{}
-// 	err = y.GetBlockByTxID(retrievedBlock, tx.TransactionID)
-// 	assert.NoError(t, err)
+	//when
+	retrievedBlock := &impl.DefaultBlock{}
+	err = y.GetBlockByTxID(retrievedBlock, "tx01")
+	assert.NoError(t, err)
 
-// 	//then
-// 	assert.Equal(t, firstBlock, retrievedBlock)
-// }
+	//then
+	assert.Equal(t, firstBlock, retrievedBlock)
+}
 
 func getNewBlock(prevSeal []byte, height uint64) *impl.DefaultBlock {
 	validator := &impl.DefaultValidator{}
-	testingTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (UTC)")
+	testingTime := getTime()
 	blockCreator := []byte("testUser")
 	txList := getTxList(testingTime)
 
@@ -353,6 +347,11 @@ func getTxList(testingTime time.Time) []*impl.DefaultTransaction {
 			},
 		},
 	}
+}
+
+func getTime() time.Time {
+	testingTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (UTC)")
+	return testingTime
 }
 
 func convertTxListType(txList []*impl.DefaultTransaction) []common.Transaction {
