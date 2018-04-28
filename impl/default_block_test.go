@@ -4,11 +4,45 @@ import (
 	"bytes"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewEmptyBlock(t *testing.T) {
+	block := getNewBlock()
+
+	expected := []byte{170, 156, 92, 136, 64, 227, 248, 194, 78, 168, 107, 144, 205, 66, 234, 40, 204, 27, 117, 52, 199, 24, 32, 245, 115, 97, 146, 217, 14, 104, 227, 165}
+	t.Run("Creating new block", func(t *testing.T) {
+		if bytes.Compare(block.Seal, expected) != 0 {
+			t.Errorf("Seal = %v, want %v", block.Seal, expected)
+		}
+	})
+}
+
+func TestSerializeAndDeserialize(t *testing.T) {
+	block := getNewBlock()
+
+	serializedBlock, err := block.Serialize()
+	if err != nil {
+		t.Errorf("Serialize error=%v", err)
+	}
+
+	deserializedBlock := &DefaultBlock{}
+	err = deserializedBlock.Deserialize(serializedBlock)
+	if err != nil {
+		t.Errorf("Deserialize error=%v", err)
+	}
+
+	if bytes.Compare(deserializedBlock.Seal, block.Seal) != 0 {
+		t.Errorf("Failed to deserialize correctly.")
+	}
+
+	assert.Equal(t, deserializedBlock, block)
+}
+
+func getNewBlock() *DefaultBlock {
 	validator := &DefaultValidator{}
-	testingTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (PST)")
+	testingTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (UTC)")
 	blockCreator := []byte("testUser")
 	genesisSeal := []byte("genesis")
 	txList := getTxList(testingTime)
@@ -25,12 +59,7 @@ func TestNewEmptyBlock(t *testing.T) {
 	seal, _ := validator.BuildSeal(block)
 	block.SetSeal(seal)
 
-	expected := []byte{99, 189, 233, 43, 92, 7, 47, 216, 209, 10, 54, 137, 155, 0, 36, 186, 188, 94, 159, 213, 238, 240, 23, 65, 122, 21, 140, 72, 117, 63, 24, 191}
-	t.Run("Creating new block", func(t *testing.T) {
-		if bytes.Compare(block.Seal(), expected) != 0 {
-			t.Errorf("Seal = %v, want %v", block.Seal(), expected)
-		}
-	})
+	return block
 }
 
 func getTxList(testingTime time.Time) []*DefaultTransaction {
