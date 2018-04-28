@@ -32,4 +32,7 @@ type Block interface {
 	// Block을 저장을 위한 []byte로 변환 및 재변환
 	Serialize() ([]byte, error)
 	Deserialize(serializedBlock []byte) error
+
+	// Block 상태 체크 함수
+	IsReadyToPublish() bool
 }

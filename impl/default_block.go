@@ -120,3 +120,17 @@ func (block *DefaultBlock) Deserialize(serializedBlock []byte) error {
 
 	return nil
 }
+
+func (block *DefaultBlock) IsReadyToPublish() bool {
+	return block.Seal() != nil
+}
+
+func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
+	block := &DefaultBlock{}
+
+	block.SetPrevSeal(prevSeal)
+	block.SetHeight(height)
+	block.SetCreator(creator)
+
+	return block
+}
