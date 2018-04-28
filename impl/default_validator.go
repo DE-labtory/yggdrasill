@@ -16,17 +16,22 @@ var ErrHashCalculationFailed = errors.New("Hash Calculation Failed Error")
 // DefaultValidator 객체는 Validator interface를 구현한 객체.
 type DefaultValidator struct{}
 
-// ValidateProof 함수는 원래 Proof 값과 주어진 Proof 값(comparisonProof)을 비교하여, 올바른지 검증한다.
-func (t *DefaultValidator) ValidateProof(proof []byte, comparisonProof []byte) bool {
-	return bytes.Compare(proof, comparisonProof) == 0
+// ValidateSeal 함수는 원래 Seal 값과 주어진 Seal 값(comparisonSeal)을 비교하여, 올바른지 검증한다.
+func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock common.Block) (bool, error) {
+	comparisonSeal, error := t.BuildSeal(comparisonBlock)
+	if error != nil {
+		return false, error
+	}
+
+	return bytes.Compare(seal, comparisonSeal) == 0, nil
 }
 
-// ValidateTxProof 함수는 주어진 Transaction 리스트에 따라 주어진 DefaultValidator 전체(proof)를 검증함.
-func (t *DefaultValidator) ValidateTxProof(txProof [][]byte, txList []common.Transaction) (bool, error) {
+// ValidateTxSeal 함수는 주어진 Transaction 리스트에 따라 주어진 transaction Seal을 검증함.
+func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []common.Transaction) (bool, error) {
 	leafNodeIndex := 0
-	for i, n := range txProof {
+	for i, n := range txSeal {
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
-		if rightIndex >= len(txProof) {
+		if rightIndex >= len(txSeal) {
 			// Check Leaf Node
 			calculatedHash, error := txList[leafNodeIndex].CalculateHash()
 			if error != nil {
@@ -39,7 +44,7 @@ func (t *DefaultValidator) ValidateTxProof(txProof [][]byte, txList []common.Tra
 			leafNodeIndex++
 		} else {
 			// Check Intermediate Node
-			leftNode, rightNode := txProof[leftIndex], txProof[rightIndex]
+			leftNode, rightNode := txSeal[leftIndex], txSeal[rightIndex]
 			calculatedHash := calculateIntermediateNodeHash(leftNode, rightNode)
 			if bytes.Compare(n, calculatedHash) != 0 {
 				return false, nil
@@ -50,15 +55,15 @@ func (t *DefaultValidator) ValidateTxProof(txProof [][]byte, txList []common.Tra
 	return true, nil
 }
 
-// ValidateTransaction 함수는 주어진 Transaction이 이 merkletree(txProof)에 올바로 있는지를 확인한다.
-func (t *DefaultValidator) ValidateTransaction(txProof [][]byte, tx common.Transaction) (bool, error) {
-	hash, error := tx.CalculateHash()
+// ValidateTransaction 함수는 주어진 Transaction이 이 txSeal에 올바로 있는지를 확인한다.
+func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction common.Transaction) (bool, error) {
+	hash, error := transaction.CalculateHash()
 	if error != nil {
 		return false, error
 	}
 
 	index := -1
-	for i, h := range txProof {
+	for i, h := range txSeal {
 		if bytes.Compare(h, hash) == 0 {
 			index = i
 		}
@@ -83,12 +88,12 @@ func (t *DefaultValidator) ValidateTransaction(txProof [][]byte, tx common.Trans
 
 		var parentHash []byte
 		if isLeft {
-			parentHash = calculateIntermediateNodeHash(txProof[index], txProof[siblingIndex])
+			parentHash = calculateIntermediateNodeHash(txSeal[index], txSeal[siblingIndex])
 		} else {
-			parentHash = calculateIntermediateNodeHash(txProof[siblingIndex], txProof[index])
+			parentHash = calculateIntermediateNodeHash(txSeal[siblingIndex], txSeal[index])
 		}
 
-		if bytes.Compare(parentHash, txProof[parentIndex]) != 0 {
+		if bytes.Compare(parentHash, txSeal[parentIndex]) != 0 {
 			return false, nil
 		}
 
@@ -98,16 +103,38 @@ func (t *DefaultValidator) ValidateTransaction(txProof [][]byte, tx common.Trans
 	return true, nil
 }
 
-// BuildProofAndTxProof 는 DefaultTransaction 배열을 받아서 DefaultValidator 객체와 Proof를 생성하여 반환한다.
+// BuildSeal 함수는 block 객체를 받아서 Seal 값을 만들고, Seal 값을 반환한다.
+// 인풋 파라미터의 block에 자동으로 할당해주지는 않는다.
+func (t *DefaultValidator) BuildSeal(block common.Block) ([]byte, error) {
+	timestamp, err := getTimestampByte(block)
+	if err != nil {
+		return nil, err
+	}
+
+	prevSeal, txListSeal, creator := block.PrevSeal(), block.TxSeal(), block.Creator()
+
+	if prevSeal == nil || txListSeal == nil || creator == nil {
+		return nil, common.ErrInsufficientFields
+	}
+
+	rootHash := txListSeal[0]
+	combined := append(prevSeal, rootHash...)
+	combined = append(combined, timestamp...)
+
+	seal := calculateHash(combined)
+	return seal, nil
+}
+
+// BuildTxSeal 는 DefaultTransaction 배열을 받아서 DefaultValidator 객체와 Proof를 생성하여 반환한다.
 // Proof는 주어진 txList의 위변조가 없다는 것을 증명할 []byte 값으로 DefaultValidator의 경우 루트 노드 값을 사용한다.
 // TxProof는 개별 transaction들 각각에 대한 Proof 리스트를 의미한다.
-func (t *DefaultValidator) BuildProofAndTxProof(txList []common.Transaction) ([]byte, [][]byte, error) {
+func (t *DefaultValidator) BuildTxSeal(txList []common.Transaction) ([][]byte, error) {
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
 		leafNode, error := tx.CalculateHash()
 		if error != nil {
-			return nil, nil, error
+			return nil, error
 		}
 
 		leafNodeList = append(leafNodeList, leafNode)
@@ -121,11 +148,11 @@ func (t *DefaultValidator) BuildProofAndTxProof(txList []common.Transaction) ([]
 
 	tree, error := buildTree(leafNodeList, leafNodeList)
 	if error != nil {
-		return nil, nil, error
+		return nil, error
 	}
 
 	// DefaultValidator 는 Merkle Tree의 루트노드(tree[0])를 Proof로 간주함
-	return tree[0], tree, nil
+	return tree, nil
 }
 
 func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {
@@ -153,4 +180,18 @@ func calculateIntermediateNodeHash(leftHash []byte, rightHash []byte) []byte {
 	combinedHash := append(leftHash, rightHash...)
 
 	return calculateHash(combinedHash)
+}
+
+func getTimestampByte(block common.Block) ([]byte, error) {
+	timestamp, err := block.Timestamp()
+	if err != nil {
+		return nil, err
+	}
+
+	byteTimestamp, err := timestamp.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+
+	return byteTimestamp, nil
 }
