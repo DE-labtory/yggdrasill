@@ -5,9 +5,7 @@ import (
 
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
 	"github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/yggdrasill/transaction"
 	"github.com/it-chain/yggdrasill/util"
-	"github.com/it-chain/yggdrasill/validator"
 )
 
 const (
@@ -20,10 +18,10 @@ const (
 
 type Yggdrasill struct {
 	DBProvider *DBProvider
-	validator  validator.Validator
+	validator  common.Validator
 }
 
-func NewYggdrasill(keyValueDB key_value_db.KeyValueDB, validator validator.Validator, opts map[string]interface{}) *Yggdrasill {
+func NewYggdrasill(keyValueDB key_value_db.KeyValueDB, validator common.Validator, opts map[string]interface{}) *Yggdrasill {
 
 	dbProvider := CreateNewDBProvider(keyValueDB)
 
@@ -60,12 +58,12 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 	blockNumberDB := y.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
 
-	err = blockHashDB.Put(block.Seal(), serializedBlock, true)
+	err = blockHashDB.Put(block.GetSeal(), serializedBlock, true)
 	if err != nil {
 		return err
 	}
 
-	err = blockNumberDB.Put([]byte(fmt.Sprint(block.Height())), block.Seal(), true)
+	err = blockNumberDB.Put([]byte(fmt.Sprint(block.GetHeight())), block.GetSeal(), true)
 	if err != nil {
 		return err
 	}
@@ -75,7 +73,7 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 		return err
 	}
 
-	for _, tx := range block.TxList() {
+	for _, tx := range block.GetTxList() {
 		serializedTX, err := tx.Serialize()
 		if err != nil {
 			return err
@@ -86,7 +84,7 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 			return err
 		}
 
-		err = utilDB.Put([]byte(tx.GetID()), block.Seal(), true)
+		err = utilDB.Put([]byte(tx.GetID()), block.GetSeal(), true)
 		if err != nil {
 			return err
 		}
@@ -127,12 +125,12 @@ func (y *Yggdrasill) GetLastBlock(block common.Block) error {
 		return err
 	}
 
-	err = util.Deserialize(serializedBlock, block)
+	err = block.Deserialize(serializedBlock)
 
 	return err
 }
 
-func (y *Yggdrasill) GetTransactionByTxID(transaction transaction.Transaction, txid string) error {
+func (y *Yggdrasill) GetTransactionByTxID(transaction common.Transaction, txid string) error {
 	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
 
 	serializedTX, err := transactionDB.Get([]byte(txid))

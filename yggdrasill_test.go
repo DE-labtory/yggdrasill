@@ -4,9 +4,11 @@ import (
 	"os"
 	"testing"
 
+	"time"
+
 	"github.com/it-chain/leveldb-wrapper"
+	"github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/yggdrasill/impl"
-	"github.com/it-chain/yggdrasill/transaction"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,23 +26,19 @@ func TestYggDrasill_AddBlock(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	firstBlock := &impl.DefaultBlock{CreatorID: "test"}
-	tx := &transaction.DefaultTransaction{ID: "123"}
-	err := firstBlock.PutTx(tx)
-	assert.NoError(t, err)
-
-	err = y.AddBlock(firstBlock)
+	firstBlock := getNewBlock([]byte("genesis"), 0)
+	err := y.AddBlock(firstBlock)
 	assert.NoError(t, err)
 
 	lastBlock := &impl.DefaultBlock{}
 	err = y.GetLastBlock(lastBlock)
 	assert.NoError(t, err)
 
-	assert.Equal(t, firstBlock.Height(), lastBlock.Height())
-	assert.Equal(t, uint64(0), firstBlock.Height())
-	assert.Equal(t, uint64(0), lastBlock.Height())
-	assert.Equal(t, "test", lastBlock.CreatorID)
-	assert.Equal(t, "123", lastBlock.TxList()[0].GetID())
+	assert.Equal(t, firstBlock.GetHeight(), lastBlock.GetHeight())
+	assert.Equal(t, uint64(0), firstBlock.GetHeight())
+	assert.Equal(t, uint64(0), lastBlock.GetHeight())
+	assert.Equal(t, []byte("testUser"), lastBlock.GetCreator())
+	assert.Equal(t, "tx01", lastBlock.GetTxList()[0].GetID())
 
 	//fmt.Print(lastBlock)
 }
@@ -61,16 +59,14 @@ func TestYggDrasill_AddBlock2(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	block1 := &impl.DefaultBlock{CreatorID: "test"}
-	block1.SetHeight(0)
-	block2 := &impl.DefaultBlock{CreatorID: "test"}
-	block2.SetHeight(2)
+	block1 := getNewBlock([]byte("genesis"), 0)
+	block2 := getNewBlock(block1.GetSeal(), 1)
 
 	err := y.AddBlock(block1)
 	assert.NoError(t, err)
 
 	err = y.AddBlock(block2)
-	assert.Error(t, err)
+	assert.NoError(t, err)
 }
 
 // func TestYggdrasil_GetBlockByNumber(t *testing.T) {
@@ -240,3 +236,102 @@ func TestYggDrasill_AddBlock2(t *testing.T) {
 // 	//then
 // 	assert.Equal(t, firstBlock, retrievedBlock)
 // }
+
+func getNewBlock(prevSeal []byte, height uint64) *impl.DefaultBlock {
+	validator := &impl.DefaultValidator{}
+	testingTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (UTC)")
+	blockCreator := []byte("testUser")
+	txList := getTxList(testingTime)
+
+	block := impl.NewEmptyBlock(prevSeal, height, blockCreator)
+	block.SetTimestamp(testingTime)
+	for _, tx := range txList {
+		block.PutTx(tx)
+	}
+
+	txSeal, _ := validator.BuildTxSeal(convertTxListType(txList))
+	block.SetTxSeal(txSeal)
+
+	seal, _ := validator.BuildSeal(block)
+	block.SetSeal(seal)
+
+	return block
+}
+
+func getTxList(testingTime time.Time) []*impl.DefaultTransaction {
+	return []*impl.DefaultTransaction{
+		{
+			PeerID:    "p01",
+			ID:        "tx01",
+			Status:    0,
+			Timestamp: testingTime,
+			TxData: &impl.TxData{
+				Jsonrpc: "jsonRPC01",
+				Method:  "invoke",
+				Params: impl.Params{
+					Type:     0,
+					Function: "function01",
+					Args:     []string{"arg1", "arg2"},
+				},
+				ID: "txdata01",
+			},
+		},
+		{
+			PeerID:    "p02",
+			ID:        "tx02",
+			Status:    0,
+			Timestamp: testingTime,
+			TxData: &impl.TxData{
+				Jsonrpc: "jsonRPC02",
+				Method:  "invoke",
+				Params: impl.Params{
+					Type:     0,
+					Function: "function02",
+					Args:     []string{"arg1", "arg2"},
+				},
+				ID: "txdata02",
+			},
+		},
+		{
+			PeerID:    "p03",
+			ID:        "tx03",
+			Status:    0,
+			Timestamp: testingTime,
+			TxData: &impl.TxData{
+				Jsonrpc: "jsonRPC03",
+				Method:  "invoke",
+				Params: impl.Params{
+					Type:     0,
+					Function: "function03",
+					Args:     []string{"arg1", "arg2"},
+				},
+				ID: "txdata03",
+			},
+		},
+		{
+			PeerID:    "p04",
+			ID:        "tx04",
+			Status:    0,
+			Timestamp: testingTime,
+			TxData: &impl.TxData{
+				Jsonrpc: "jsonRPC04",
+				Method:  "invoke",
+				Params: impl.Params{
+					Type:     0,
+					Function: "function04",
+					Args:     []string{"arg1", "arg2"},
+				},
+				ID: "txdata04",
+			},
+		},
+	}
+}
+
+func convertTxListType(txList []*impl.DefaultTransaction) []common.Transaction {
+	convTxList := make([]common.Transaction, 0)
+	for _, tx := range txList {
+		convTxList = append(convTxList, tx)
+	}
+
+	return convTxList
+}
