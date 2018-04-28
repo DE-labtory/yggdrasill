@@ -1,4 +1,4 @@
-package blockchaindb
+package yggdrasill
 
 import (
 	"errors"
