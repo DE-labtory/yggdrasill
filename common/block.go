@@ -20,6 +20,15 @@ type Block interface {
 	SetCreator(creator []byte)
 	SetTimestamp(currentTime time.Time)
 
+	// Block의 required field getters
+	GetSeal() []byte
+	GetPrevSeal() []byte
+	GetHeight() uint64
+	GetTxList() []Transaction
+	GetTxSeal() [][]byte
+	GetCreator() []byte
+	GetTimestamp() time.Time
+
 	// Block을 저장을 위한 []byte로 변환 및 재변환
 	Serialize() ([]byte, error)
 	Deserialize(serializedBlock []byte) error

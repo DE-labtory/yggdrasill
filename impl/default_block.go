@@ -56,6 +56,38 @@ func (block *DefaultBlock) SetTimestamp(currentTime time.Time) {
 	block.Timestamp = currentTime
 }
 
+func (block *DefaultBlock) GetSeal() []byte {
+	return block.Seal
+}
+
+func (block *DefaultBlock) GetPrevSeal() []byte {
+	return block.PrevSeal
+}
+
+func (block *DefaultBlock) GetHeight() uint64 {
+	return block.Height
+}
+
+func (block *DefaultBlock) GetTxList() []common.Transaction {
+	txList := make([]common.Transaction, 0)
+	for _, tx := range block.TxList {
+		txList = append(txList, tx)
+	}
+	return txList
+}
+
+func (block *DefaultBlock) GetTxSeal() [][]byte {
+	return block.TxSeal
+}
+
+func (block *DefaultBlock) GetCreator() []byte {
+	return block.Creator
+}
+
+func (block *DefaultBlock) GetTimestamp() time.Time {
+	return block.Timestamp
+}
+
 func (block *DefaultBlock) Serialize() ([]byte, error) {
 	data, err := json.Marshal(block)
 	if err != nil {
