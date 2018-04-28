@@ -43,7 +43,6 @@ func TestYggDrasill_AddBlock(t *testing.T) {
 	//fmt.Print(lastBlock)
 }
 
-//when height did not matched
 func TestYggDrasill_AddBlock2(t *testing.T) {
 
 	dbPath := "./.db"
@@ -67,6 +66,32 @@ func TestYggDrasill_AddBlock2(t *testing.T) {
 
 	err = y.AddBlock(block2)
 	assert.NoError(t, err)
+}
+
+// PrevSeal 값을 잘못 입력해서 에러를 출력.
+func TestYggDrasill_AddBlock3(t *testing.T) {
+
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasill(db, nil, opts)
+
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	block1 := getNewBlock([]byte("genesis"), 0)
+	block2 := getNewBlock([]byte("genesis"), 1)
+
+	err := y.AddBlock(block1)
+	assert.NoError(t, err)
+
+	err = y.AddBlock(block2)
+	assert.Error(t, err)
 }
 
 // func TestYggdrasil_GetBlockByNumber(t *testing.T) {
