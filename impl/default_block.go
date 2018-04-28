@@ -1,10 +1,9 @@
 package impl
 
 import (
+	"bytes"
 	"encoding/json"
 	"time"
-
-	"bytes"
 
 	"github.com/it-chain/yggdrasill/common"
 )
