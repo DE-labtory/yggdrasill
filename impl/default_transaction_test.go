@@ -35,7 +35,7 @@ func TestNewDefaultTransaction(t *testing.T) {
 	})
 }
 
-func TestDefaultTransaction_CalculateHash(t *testing.T) {
+func TestDefaultTransaction_CalculateSeal(t *testing.T) {
 	testData := getTestData()
 
 	tests := []struct {
@@ -45,7 +45,7 @@ func TestDefaultTransaction_CalculateHash(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "Test CalculateHash",
+			name:    "Test CalculateSeal",
 			tx:      testData,
 			want:    []byte{160, 111, 85, 201, 10, 162, 8, 252, 84, 135, 199, 9, 109, 167, 73, 32, 140, 84, 200, 238, 251, 38, 41, 8, 189, 128, 188, 43, 32, 172, 58, 120},
 			wantErr: false,
@@ -53,13 +53,13 @@ func TestDefaultTransaction_CalculateHash(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.tx.CalculateHash()
+			got, err := tt.tx.CalculateSeal()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("DefaultTransaction.CalculateHash() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("DefaultTransaction.CalculateSeal() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if bytes.Compare(got, tt.want) != 0 {
-				t.Errorf("DefaultTransaction.CalculateHash() = %v, want %v", got, tt.want)
+				t.Errorf("DefaultTransaction.CalculateSeal() = %v, want %v", got, tt.want)
 			}
 		})
 	}

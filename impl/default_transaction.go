@@ -59,9 +59,9 @@ func (t *DefaultTransaction) GetID() string {
 	return t.ID
 }
 
-// CalculateHash 함수는 Transaction 고유의 Hash 값을 계산하여 반환한다.
+// CalculateSeal 함수는 Transaction 고유의 Hash 값을 계산하여 반환한다.
 // TODO: Seal로 이름 변경.
-func (t *DefaultTransaction) CalculateHash() ([]byte, error) {
+func (t *DefaultTransaction) CalculateSeal() ([]byte, error) {
 	// TODO: util에서 복사해오기.
 	serializedTx, error := util.Serialize(t)
 	if error != nil {

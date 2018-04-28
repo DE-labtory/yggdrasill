@@ -33,7 +33,7 @@ func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []common.Trans
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
 		if rightIndex >= len(txSeal) {
 			// Check Leaf Node
-			calculatedHash, error := txList[leafNodeIndex].CalculateHash()
+			calculatedHash, error := txList[leafNodeIndex].CalculateSeal()
 			if error != nil {
 				return false, ErrHashCalculationFailed
 			}
@@ -57,7 +57,7 @@ func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []common.Trans
 
 // ValidateTransaction 함수는 주어진 Transaction이 이 txSeal에 올바로 있는지를 확인한다.
 func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction common.Transaction) (bool, error) {
-	hash, error := transaction.CalculateHash()
+	hash, error := transaction.CalculateSeal()
 	if error != nil {
 		return false, error
 	}
@@ -136,7 +136,7 @@ func (t *DefaultValidator) BuildTxSeal(txList []common.Transaction) ([][]byte, e
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
-		leafNode, error := tx.CalculateHash()
+		leafNode, error := tx.CalculateSeal()
 		if error != nil {
 			return nil, error
 		}
