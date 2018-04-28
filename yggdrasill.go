@@ -1,6 +1,7 @@
 package blockchaindb
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
@@ -14,6 +15,8 @@ const (
 	UTIL_DB         = "util"
 	LAST_BLOCK_KEY  = "last_block"
 )
+
+var ErrPrevSealMismatch = errors.New("PrevSeal value mismatch")
 
 type Yggdrasill struct {
 	DBProvider *DBProvider
@@ -40,7 +43,7 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 	}
 
 	if lastBlockByte != nil && !block.IsPrev(lastBlockByte) {
-		return NewBlockError("height or prevSeal is not matched")
+		return ErrPrevSealMismatch
 	}
 
 	serializedBlock, err := block.Serialize()
