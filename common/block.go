@@ -18,16 +18,7 @@ type Block interface {
 	PutTx(tx Transaction) error
 	SetTxSeal(txSeal [][]byte)
 	SetCreator(creator []byte)
-	SetTimestamp(currentTime time.Time) error
-
-	// Block의 required field getters
-	Seal() []byte
-	PrevSeal() []byte
-	Height() uint64
-	TxList() []Transaction
-	TxSeal() [][]byte
-	Creator() []byte
-	Timestamp() (time.Time, error)
+	SetTimestamp(currentTime time.Time)
 
 	// Block을 저장을 위한 []byte로 변환 및 재변환
 	Serialize() ([]byte, error)
