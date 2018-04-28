@@ -35,7 +35,6 @@ func (y *Yggdrasill) Close() {
 func (y *Yggdrasill) AddBlock(block common.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
-	// TODO: Check the last block
 	lastBlockByte, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
 	if err != nil {
 		return err
