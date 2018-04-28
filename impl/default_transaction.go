@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/it-chain/yggdrasill/util"
@@ -53,20 +54,14 @@ type DefaultTransaction struct {
 	TxData    *TxData
 }
 
-// Serialize 함수는 Transaction을 []byte 형태로 변환한다.
-func (t DefaultTransaction) Serialize() ([]byte, error) {
-	// TODO: util에서 복사해오기.
-	return util.Serialize(t)
-}
-
 // GetID 함수는 Transaction의 ID 값을 반환한다.
-func (t DefaultTransaction) GetID() string {
+func (t *DefaultTransaction) GetID() string {
 	return t.ID
 }
 
 // CalculateHash 함수는 Transaction 고유의 Hash 값을 계산하여 반환한다.
 // TODO: Seal로 이름 변경.
-func (t DefaultTransaction) CalculateHash() ([]byte, error) {
+func (t *DefaultTransaction) CalculateHash() ([]byte, error) {
 	// TODO: util에서 복사해오기.
 	serializedTx, error := util.Serialize(t)
 	if error != nil {
@@ -74,6 +69,29 @@ func (t DefaultTransaction) CalculateHash() ([]byte, error) {
 	}
 
 	return calculateHash(serializedTx), nil
+}
+
+// Serialize 함수는 Transaction을 []byte 형태로 변환한다.
+func (t *DefaultTransaction) Serialize() ([]byte, error) {
+	data, err := json.Marshal(t)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (t *DefaultTransaction) Deserialize(serializedBytes []byte) error {
+	if len(serializedBytes) == 0 {
+		return nil
+	}
+
+	err := json.Unmarshal(serializedBytes, t)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // NewDefaultTransaction 함수는 새로운 DefaultTransaction를 반환한다.

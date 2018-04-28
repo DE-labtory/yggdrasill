@@ -2,9 +2,10 @@ package impl
 
 import (
 	"bytes"
-	"reflect"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewDefaultTransaction(t *testing.T) {
@@ -64,29 +65,21 @@ func TestDefaultTransaction_CalculateHash(t *testing.T) {
 	}
 }
 
-func Test_calculateHash(t *testing.T) {
-	type args struct {
-		b []byte
-	}
-	tests := []struct {
-		name string
-		args args
-		want []byte
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := calculateHash(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("calculateHash() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+func TestDefaultTransaction_Serialize(t *testing.T) {
+	tx := getTestData()
+	txBytes, err := tx.Serialize()
+
+	assert.NoError(t, err)
+
+	deserializedTx := &DefaultTransaction{}
+	deserializedTx.Deserialize(txBytes)
+
+	assert.Equal(t, deserializedTx, tx)
 }
 
 func getTestingTime() time.Time {
 	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
-	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
+	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (UTC)")
 
 	return testingTime
 }
