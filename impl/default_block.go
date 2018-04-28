@@ -9,26 +9,17 @@ import (
 )
 
 type DefaultBlock struct {
-	seal       []byte
-	prevSeal   []byte
-	height     uint64
-	txList     []*DefaultTransaction
-	txListSeal [][]byte
-	timestamp  []byte
-	CreatorID  string
+	seal      []byte
+	prevSeal  []byte
+	height    uint64
+	txList    []*DefaultTransaction
+	txSeal    [][]byte
+	timestamp []byte
+	creator   []byte
 }
 
-func (block *DefaultBlock) GenerateSeal() ([]byte, error) {
-	if block.prevSeal == nil || block.txListSeal == nil || block.timestamp == nil {
-		return nil, common.ErrInsufficientFields
-	}
-
-	rootHash := block.txListSeal[0]
-	combined := append(block.prevSeal, rootHash...)
-	combined = append(combined, block.timestamp...)
-
-	seal := calculateHash(combined)
-	return seal, nil
+func (block *DefaultBlock) SetSeal(seal []byte) {
+	block.seal = seal
 }
 
 func (block *DefaultBlock) SetPrevSeal(prevSeal []byte) {
@@ -55,8 +46,22 @@ func (block *DefaultBlock) PutTx(transaction common.Transaction) error {
 	return common.ErrTransactionType
 }
 
-func (block *DefaultBlock) SetTxListSeal(txListSeal [][]byte) {
-	block.txListSeal = txListSeal
+func (block *DefaultBlock) SetTxSeal(txSeal [][]byte) {
+	block.txSeal = txSeal
+}
+
+func (block *DefaultBlock) SetCreator(creator []byte) {
+	block.creator = creator
+}
+
+func (block *DefaultBlock) SetTimestamp(currentTime time.Time) error {
+	timestamp, error := currentTime.MarshalBinary()
+	if error != nil {
+		return error
+	}
+
+	block.timestamp = timestamp
+	return nil
 }
 
 func (block *DefaultBlock) Seal() []byte {
@@ -79,8 +84,22 @@ func (block *DefaultBlock) TxList() []common.Transaction {
 	return txList
 }
 
-func (block *DefaultBlock) TxListSeal() [][]byte {
-	return block.txListSeal
+func (block *DefaultBlock) TxSeal() [][]byte {
+	return block.txSeal
+}
+
+func (block *DefaultBlock) Creator() []byte {
+	return block.creator
+}
+
+func (block *DefaultBlock) Timestamp() (time.Time, error) {
+	var time time.Time
+	error := time.UnmarshalBinary(block.timestamp)
+	if error != nil {
+		return time, error
+	}
+
+	return time, nil
 }
 
 func (block *DefaultBlock) Serialize() ([]byte, error) {
@@ -102,24 +121,4 @@ func (block *DefaultBlock) Deserialize(serializedBlock []byte) error {
 	}
 
 	return nil
-}
-
-func (block *DefaultBlock) SetTimestamp(currentTime time.Time) error {
-	timestamp, error := currentTime.MarshalBinary()
-	if error != nil {
-		return error
-	}
-
-	block.timestamp = timestamp
-	return nil
-}
-
-func (block *DefaultBlock) Timestamp() (time.Time, error) {
-	var time time.Time
-	error := time.UnmarshalBinary(block.timestamp)
-	if error != nil {
-		return time, error
-	}
-
-	return time, nil
 }
