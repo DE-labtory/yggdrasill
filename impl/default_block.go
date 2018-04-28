@@ -2,7 +2,6 @@ package impl
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/it-chain/yggdrasill/common"
@@ -38,7 +37,6 @@ func (block *DefaultBlock) PutTx(transaction common.Transaction) error {
 		}
 
 		block.txList = append(block.txList, convTx)
-		fmt.Println(len(block.txList))
 
 		return nil
 	}
