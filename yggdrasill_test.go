@@ -1,6 +1,7 @@
 package blockchaindb
 
 import (
+	"math/rand"
 	"os"
 	"testing"
 
@@ -94,43 +95,37 @@ func TestYggDrasill_AddBlock3(t *testing.T) {
 	assert.Error(t, err)
 }
 
-// func TestYggdrasil_GetBlockByNumber(t *testing.T) {
+func TestYggdrasill_GetBlockByHeight(t *testing.T) {
 
-// 	dbPath := "./.db"
-// 	opts := map[string]interface{}{
-// 		"db_path": dbPath,
-// 	}
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
 
-// 	db := leveldbwrapper.CreateNewDB(dbPath)
-// 	y := NewYggdrasill(db, nil, opts)
-// 	defer func() {
-// 		y.Close()
-// 		os.RemoveAll(dbPath)
-// 	}()
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y := NewYggdrasill(db, nil, opts)
+	defer func() {
+		y.Close()
+		os.RemoveAll(dbPath)
+	}()
 
-// 	for i := 0; i < 100; i++ {
-// 		tmpBlock := &impl.DefaultBlock{CreatorID: fmt.Sprintf("test_%d", i)}
-// 		tmpBlock.SetHeight(uint64(i))
-// 		if i > 0 {
-// 			tmpBlock.SetPrevSeal([]byte(fmt.Sprintf("hash_%d", i-1)))
-// 			tmpBlock.SetTxListSeal([][]byte{[]byte(fmt.Sprintf("txListSeal_%d", i-1))})
-// 			tmpBlock.SetTimestamp(time.Now())
-// 		}
-// 		tmpBlock.GenerateSeal()
+	prevSeal := []byte("genesis")
+	for i := 0; i < 100; i++ {
+		tmpBlock := getNewBlock(prevSeal, uint64(i))
+		err := y.AddBlock(tmpBlock)
+		assert.NoError(t, err)
 
-// 		err := y.AddBlock(tmpBlock)
-// 		assert.NoError(t, err)
-// 	}
+		prevSeal = tmpBlock.GetSeal()
+	}
 
-// 	randomNumber := uint64(rand.Intn(100))
+	randomNumber := uint64(rand.Intn(100))
 
-// 	retrievedBlock := &impl.DefaultBlock{}
-// 	err := y.GetBlockByHeight(retrievedBlock, randomNumber)
+	retrievedBlock := &impl.DefaultBlock{}
+	err := y.GetBlockByHeight(retrievedBlock, randomNumber)
 
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
-// 	assert.Equal(t, fmt.Sprintf("test_%d", randomNumber), retrievedBlock.Header.CreatorID)
-// }
+	assert.NoError(t, err)
+	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
+}
 
 // func TestYggdrasil_GetBlockBySeal(t *testing.T) {
 
