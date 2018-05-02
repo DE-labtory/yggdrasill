@@ -17,6 +17,8 @@ const (
 )
 
 var ErrPrevSealMismatch = errors.New("PrevSeal value mismatch")
+var ErrSealValidation = errors.New("seal validation failed")
+var ErrTxSealValidation = errors.New("txSeal validation failed")
 
 type Yggdrasill struct {
 	DBProvider *DBProvider
@@ -35,22 +37,17 @@ func (y *Yggdrasill) Close() {
 }
 
 func (y *Yggdrasill) AddBlock(block common.Block) error {
-	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
-
-	lastBlockByte, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
-	if err != nil {
-		return err
-	}
-
-	if lastBlockByte != nil && !block.IsPrev(lastBlockByte) {
-		return ErrPrevSealMismatch
-	}
-
 	serializedBlock, err := block.Serialize()
 	if err != nil {
 		return err
 	}
 
+	err = y.validateBlock(block)
+	if err != nil {
+		return err
+	}
+
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 	blockSealDB := y.DBProvider.GetDBHandle(BLOCK_SEAL_DB)
 	blockHeightDB := y.DBProvider.GetDBHandle(BLOCK_HEIGHT_DB)
 	transactionDB := y.DBProvider.GetDBHandle(TRANSACTION_DB)
@@ -85,6 +82,43 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (y *Yggdrasill) validateBlock(block common.Block) error {
+	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
+
+	lastBlockByte, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
+	if err != nil {
+		return err
+	}
+
+	// Check if the new block has a correct pointer to the last block
+	if lastBlockByte != nil && !block.IsPrev(lastBlockByte) {
+		return ErrPrevSealMismatch
+	}
+
+	// Validate the Seal of the new block using the validator
+	result, err := y.validator.ValidateSeal(block.GetSeal(), block)
+
+	if err != nil {
+		return err
+	}
+
+	if !result {
+		return ErrSealValidation
+	}
+
+	// Validate the TxSeal of the new block using the validator
+	result, err = y.validator.ValidateTxSeal(block.GetTxSeal(), block.GetTxList())
+	if err != nil {
+		return err
+	}
+
+	if !result {
+		return ErrTxSealValidation
 	}
 
 	return nil

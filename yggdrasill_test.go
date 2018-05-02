@@ -20,8 +20,10 @@ func TestYggdrasill_AddBlock(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y := NewYggdrasill(db, validator, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -51,8 +53,10 @@ func TestYggdrasill_AddBlock2(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y := NewYggdrasill(db, validator, opts)
 
 	defer func() {
 		y.Close()
@@ -77,8 +81,10 @@ func TestYggdrasill_AddBlock3(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y := NewYggdrasill(db, validator, opts)
 
 	defer func() {
 		y.Close()
@@ -102,8 +108,10 @@ func TestYggdrasill_GetBlockByHeight(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y := NewYggdrasill(db, validator, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -134,8 +142,10 @@ func TestYggdrasil_GetBlockBySeal(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y := NewYggdrasill(db, validator, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -171,8 +181,10 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y := NewYggdrasill(db, validator, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -209,8 +221,10 @@ func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y := NewYggdrasill(db, validator, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -238,8 +252,10 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y := NewYggdrasill(db, validator, opts)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
