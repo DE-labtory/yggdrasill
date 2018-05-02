@@ -19,17 +19,22 @@ const (
 var ErrPrevSealMismatch = errors.New("PrevSeal value mismatch")
 var ErrSealValidation = errors.New("seal validation failed")
 var ErrTxSealValidation = errors.New("txSeal validation failed")
+var ErrNoRequiredParameters = errors.New("required parameters not passed")
+var ErrNoValidator = errors.New("validator not defined")
 
 type Yggdrasill struct {
 	DBProvider *DBProvider
 	validator  common.Validator
 }
 
-func NewYggdrasill(keyValueDB key_value_db.KeyValueDB, validator common.Validator, opts map[string]interface{}) *Yggdrasill {
+func NewYggdrasill(keyValueDB key_value_db.KeyValueDB, validator common.Validator, opts map[string]interface{}) (*Yggdrasill, error) {
+	if keyValueDB == nil || validator == nil {
+		return nil, ErrNoRequiredParameters
+	}
 
 	dbProvider := CreateNewDBProvider(keyValueDB)
 
-	return &Yggdrasill{DBProvider: dbProvider, validator: validator}
+	return &Yggdrasill{DBProvider: dbProvider, validator: validator}, nil
 }
 
 func (y *Yggdrasill) Close() {
@@ -88,6 +93,10 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 }
 
 func (y *Yggdrasill) validateBlock(block common.Block) error {
+	if y.validator == nil {
+		return ErrNoValidator
+	}
+
 	utilDB := y.DBProvider.GetDBHandle(UTIL_DB)
 
 	lastBlockByte, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
