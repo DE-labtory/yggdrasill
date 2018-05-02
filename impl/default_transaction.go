@@ -1,10 +1,8 @@
-package transaction
+package impl
 
 import (
-	"crypto/sha256"
+	"encoding/json"
 	"time"
-
-	"github.com/it-chain/yggdrasill/util"
 )
 
 // Status 변수는 Transaction의 상태를 Unconfirmed, Confirmed, Unknown 중 하나로 표현함.
@@ -54,30 +52,42 @@ type DefaultTransaction struct {
 	TxData    *TxData
 }
 
-// Serialize 함수는 Transaction을 []byte 형태로 변환한다.
-func (t DefaultTransaction) Serialize() ([]byte, error) {
-	return util.Serialize(t)
-}
-
 // GetID 함수는 Transaction의 ID 값을 반환한다.
-func (t DefaultTransaction) GetID() string {
+func (t *DefaultTransaction) GetID() string {
 	return t.ID
 }
 
-// CalculateHash 함수는 Transaction 고유의 Hash 값을 계산하여 반환한다.
-func (t DefaultTransaction) CalculateHash() ([]byte, error) {
-	serializedTx, error := util.Serialize(t)
-	if error != nil {
-		return nil, error
+// CalculateSeal 함수는 Transaction 고유의 Hash 값을 계산하여 반환한다.
+func (t *DefaultTransaction) CalculateSeal() ([]byte, error) {
+	serializedTx, err := json.Marshal(t)
+	if err != nil {
+		return nil, err
 	}
 
 	return calculateHash(serializedTx), nil
 }
 
-func calculateHash(b []byte) []byte {
-	hashValue := sha256.New()
-	hashValue.Write(b)
-	return hashValue.Sum(nil)
+// Serialize 함수는 Transaction을 []byte 형태로 변환한다.
+func (t *DefaultTransaction) Serialize() ([]byte, error) {
+	data, err := json.Marshal(t)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (t *DefaultTransaction) Deserialize(serializedBytes []byte) error {
+	if len(serializedBytes) == 0 {
+		return nil
+	}
+
+	err := json.Unmarshal(serializedBytes, t)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // NewDefaultTransaction 함수는 새로운 DefaultTransaction를 반환한다.
