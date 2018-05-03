@@ -24,7 +24,7 @@ func TestYggdrasill_NewYggdrasill_NoValidator(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestYggdrasill_AddBlock(t *testing.T) {
+func TestYggdrasill_AddBlock_OneBlock(t *testing.T) {
 
 	dbPath := "./.db"
 	opts := map[string]interface{}{
@@ -59,7 +59,7 @@ func TestYggdrasill_AddBlock(t *testing.T) {
 	//fmt.Print(lastBlock)
 }
 
-func TestYggdrasill_AddBlock2(t *testing.T) {
+func TestYggdrasill_AddBlock_TwoBlocks(t *testing.T) {
 
 	dbPath := "./.db"
 	opts := map[string]interface{}{
@@ -88,7 +88,7 @@ func TestYggdrasill_AddBlock2(t *testing.T) {
 }
 
 // PrevSeal 값을 잘못 입력해서 에러를 출력.
-func TestYggdrasill_AddBlock3(t *testing.T) {
+func TestYggdrasill_AddBlock_WrongPrevSeal(t *testing.T) {
 
 	dbPath := "./.db"
 	opts := map[string]interface{}{
