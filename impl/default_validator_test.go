@@ -9,7 +9,7 @@ import (
 
 func TestDefaultValidator_BuildTxSeal(t *testing.T) {
 	testData := getTestingData(0)
-	expectedTxSealRoot := []byte{119, 178, 207, 195, 123, 230, 211, 193, 142, 68, 255, 99, 226, 172, 207, 211, 75, 251, 211, 128, 175, 230, 141, 51, 3, 186, 19, 179, 197, 104, 230, 29}
+	expectedTxSealRoot := []byte{195, 17, 112, 227, 157, 68, 134, 162, 202, 81, 64, 22, 8, 206, 223, 48, 121, 236, 94, 40, 230, 158, 34, 224, 226, 75, 34, 57, 69, 239, 181, 239}
 
 	validator := &DefaultValidator{}
 	gotTxSeal, err := validator.BuildTxSeal(convertType(testData))
@@ -47,6 +47,7 @@ func TestDefaultValidator_ValidateTransaction(t *testing.T) {
 			},
 			ID: "txdata05",
 		},
+		Signature: nil,
 	}
 	testData := getTestingData(0)
 	validator := &DefaultValidator{}
@@ -83,6 +84,7 @@ func getTestingData(index int) []*DefaultTransaction {
 					},
 					ID: "txdata01",
 				},
+				Signature: nil,
 			},
 			&DefaultTransaction{
 				PeerID:    "p02",
@@ -99,6 +101,7 @@ func getTestingData(index int) []*DefaultTransaction {
 					},
 					ID: "txdata02",
 				},
+				Signature: nil,
 			},
 			&DefaultTransaction{
 				PeerID:    "p03",
@@ -115,6 +118,7 @@ func getTestingData(index int) []*DefaultTransaction {
 					},
 					ID: "txdata03",
 				},
+				Signature: nil,
 			},
 			&DefaultTransaction{
 				PeerID:    "p04",
@@ -131,6 +135,7 @@ func getTestingData(index int) []*DefaultTransaction {
 					},
 					ID: "txdata04",
 				},
+				Signature: nil,
 			},
 		},
 	}[index]

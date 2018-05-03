@@ -4,7 +4,7 @@ package common
 type Transaction interface {
 	// Transaction의 required field getters
 	GetID() string
-	GetContent() []byte
+	GetContent() ([]byte, error)
 	GetSignature() []byte
 
 	// Transaction의 required field setters

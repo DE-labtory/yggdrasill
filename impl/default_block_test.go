@@ -10,7 +10,7 @@ import (
 func TestNewEmptyBlock(t *testing.T) {
 	block := getNewBlock()
 
-	expected := []byte{170, 156, 92, 136, 64, 227, 248, 194, 78, 168, 107, 144, 205, 66, 234, 40, 204, 27, 117, 52, 199, 24, 32, 245, 115, 97, 146, 217, 14, 104, 227, 165}
+	expected := []byte{26, 156, 70, 177, 186, 43, 248, 224, 3, 35, 95, 141, 188, 119, 78, 150, 234, 255, 250, 238, 211, 69, 72, 231, 88, 240, 25, 253, 75, 86, 74, 253}
 	assert.Equal(t, block.GetSeal(), expected)
 }
 
@@ -66,6 +66,7 @@ func getTxList(testingTime time.Time) []*DefaultTransaction {
 				},
 				ID: "txdata01",
 			},
+			Signature: nil,
 		},
 		{
 			PeerID:    "p02",
@@ -82,6 +83,7 @@ func getTxList(testingTime time.Time) []*DefaultTransaction {
 				},
 				ID: "txdata02",
 			},
+			Signature: nil,
 		},
 		{
 			PeerID:    "p03",
@@ -98,6 +100,7 @@ func getTxList(testingTime time.Time) []*DefaultTransaction {
 				},
 				ID: "txdata03",
 			},
+			Signature: nil,
 		},
 		{
 			PeerID:    "p04",
@@ -114,6 +117,7 @@ func getTxList(testingTime time.Time) []*DefaultTransaction {
 				},
 				ID: "txdata04",
 			},
+			Signature: nil,
 		},
 	}
 }

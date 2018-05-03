@@ -50,11 +50,33 @@ type DefaultTransaction struct {
 	PeerID    string
 	Timestamp time.Time
 	TxData    *TxData
+	Signature []byte
 }
 
 // GetID 함수는 Transaction의 ID 값을 반환한다.
 func (t *DefaultTransaction) GetID() string {
 	return t.ID
+}
+
+func (t *DefaultTransaction) GetContent() ([]byte, error) {
+	content := struct {
+		ID        string
+		Status    Status
+		PeerID    string
+		Timestamp time.Time
+		TxData    *TxData
+	}{t.ID, t.Status, t.PeerID, t.Timestamp, t.TxData}
+
+	serialized, err := serialize(content)
+	if err != nil {
+		return nil, err
+	}
+
+	return serialized, nil
+}
+
+func (t *DefaultTransaction) GetSignature() []byte {
+	return t.Signature
 }
 
 // CalculateSeal 함수는 Transaction 고유의 Hash 값을 계산하여 반환한다.
@@ -67,13 +89,13 @@ func (t *DefaultTransaction) CalculateSeal() ([]byte, error) {
 	return calculateHash(serializedTx), nil
 }
 
+func (t *DefaultTransaction) SetSignature(signature []byte) {
+	t.Signature = signature
+}
+
 // Serialize 함수는 Transaction을 []byte 형태로 변환한다.
 func (t *DefaultTransaction) Serialize() ([]byte, error) {
-	data, err := json.Marshal(t)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	return serialize(t)
 }
 
 func (t *DefaultTransaction) Deserialize(serializedBytes []byte) error {
@@ -118,4 +140,12 @@ func NewParams(paramsType int, function string, args []string) Params {
 		Function: function,
 		Args:     args,
 	}
+}
+
+func serialize(data interface{}) ([]byte, error) {
+	serialized, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return serialized, nil
 }
