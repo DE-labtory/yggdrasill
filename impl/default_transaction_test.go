@@ -20,8 +20,8 @@ func TestNewDefaultTransaction(t *testing.T) {
 }
 
 func TestDefaultTransaction_CalculateSeal(t *testing.T) {
-	tx := getTestData()
-	expectedSeal := []byte{20, 237, 92, 203, 196, 14, 152, 126, 192, 100, 16, 121, 150, 12, 129, 43, 250, 210, 188, 174, 149, 220, 17, 67, 195, 166, 82, 49, 230, 9, 160, 174}
+	tx := getTestingTxList(0)[0]
+	expectedSeal := []byte{51, 20, 199, 105, 161, 39, 78, 32, 195, 43, 149, 185, 235, 46, 217, 121, 58, 200, 87, 56, 177, 201, 240, 215, 195, 242, 13, 20, 169, 202, 38, 33}
 	seal, err := tx.CalculateSeal()
 	assert.NoError(t, err)
 
@@ -29,7 +29,7 @@ func TestDefaultTransaction_CalculateSeal(t *testing.T) {
 }
 
 func TestDefaultTransaction_Serialize(t *testing.T) {
-	tx := getTestData()
+	tx := getTestingTxList(0)[0]
 	txBytes, err := tx.Serialize()
 
 	assert.NoError(t, err)
@@ -47,26 +47,79 @@ func getTestingTime() time.Time {
 	return testingTime
 }
 
-func getTestData() *DefaultTransaction {
+func getTestingTxList(index int) []*DefaultTransaction {
 	testingTime := getTestingTime()
 
-	testData := &DefaultTransaction{
-		ID:        "transactionID01",
-		PeerID:    "peerID01",
-		Timestamp: testingTime,
-		Status:    StatusTransactionInvalid,
-		TxData: &TxData{
-			Jsonrpc: "jsonrpc",
-			Method:  Invoke,
-			ID:      "contractID01",
-			Params: Params{
-				Type:     1,
-				Function: "functionName",
-				Args:     make([]string, 0),
+	return [][]*DefaultTransaction{
+		{
+			&DefaultTransaction{
+				PeerID:    "p01",
+				ID:        "tx01",
+				Status:    0,
+				Timestamp: testingTime,
+				TxData: &TxData{
+					Jsonrpc: "jsonRPC01",
+					Method:  "invoke",
+					Params: Params{
+						Type:     0,
+						Function: "function01",
+						Args:     []string{"arg1", "arg2"},
+					},
+					ID: "txdata01",
+				},
+				Signature: nil,
+			},
+			&DefaultTransaction{
+				PeerID:    "p02",
+				ID:        "tx02",
+				Status:    0,
+				Timestamp: testingTime,
+				TxData: &TxData{
+					Jsonrpc: "jsonRPC02",
+					Method:  "invoke",
+					Params: Params{
+						Type:     0,
+						Function: "function02",
+						Args:     []string{"arg1", "arg2"},
+					},
+					ID: "txdata02",
+				},
+				Signature: nil,
+			},
+			&DefaultTransaction{
+				PeerID:    "p03",
+				ID:        "tx03",
+				Status:    0,
+				Timestamp: testingTime,
+				TxData: &TxData{
+					Jsonrpc: "jsonRPC03",
+					Method:  "invoke",
+					Params: Params{
+						Type:     0,
+						Function: "function03",
+						Args:     []string{"arg1", "arg2"},
+					},
+					ID: "txdata03",
+				},
+				Signature: nil,
+			},
+			&DefaultTransaction{
+				PeerID:    "p04",
+				ID:        "tx04",
+				Status:    0,
+				Timestamp: testingTime,
+				TxData: &TxData{
+					Jsonrpc: "jsonRPC04",
+					Method:  "invoke",
+					Params: Params{
+						Type:     0,
+						Function: "function04",
+						Args:     []string{"arg1", "arg2"},
+					},
+					ID: "txdata04",
+				},
+				Signature: nil,
 			},
 		},
-		Signature: nil,
-	}
-
-	return testData
+	}[index]
 }

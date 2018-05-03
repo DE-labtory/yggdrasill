@@ -8,7 +8,7 @@ import (
 )
 
 func TestDefaultValidator_BuildTxSeal(t *testing.T) {
-	testData := getTestingData(0)
+	testData := getTestingTxList(0)
 	expectedTxSealRoot := []byte{195, 17, 112, 227, 157, 68, 134, 162, 202, 81, 64, 22, 8, 206, 223, 48, 121, 236, 94, 40, 230, 158, 34, 224, 226, 75, 34, 57, 69, 239, 181, 239}
 
 	validator := &DefaultValidator{}
@@ -19,7 +19,7 @@ func TestDefaultValidator_BuildTxSeal(t *testing.T) {
 }
 
 func TestDefaultValidator_ValidateTxProof(t *testing.T) {
-	testData := getTestingData(0)
+	testData := getTestingTxList(0)
 	validator := &DefaultValidator{}
 	convTestData := convertType(testData)
 
@@ -49,7 +49,7 @@ func TestDefaultValidator_ValidateTransaction(t *testing.T) {
 		},
 		Signature: nil,
 	}
-	testData := getTestingData(0)
+	testData := getTestingTxList(0)
 	validator := &DefaultValidator{}
 	txSeal, err := validator.BuildTxSeal(convertType(testData))
 	assert.NoError(t, err)
@@ -61,82 +61,4 @@ func TestDefaultValidator_ValidateTransaction(t *testing.T) {
 	wrongResult, err := validator.ValidateTransaction(txSeal, notIncludedTx)
 	assert.NoError(t, err)
 	assert.Equal(t, false, wrongResult)
-}
-
-func getTestingData(index int) []*DefaultTransaction {
-	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
-	testingTime, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
-
-	return [][]*DefaultTransaction{
-		{
-			&DefaultTransaction{
-				PeerID:    "p01",
-				ID:        "tx01",
-				Status:    0,
-				Timestamp: testingTime,
-				TxData: &TxData{
-					Jsonrpc: "jsonRPC01",
-					Method:  "invoke",
-					Params: Params{
-						Type:     0,
-						Function: "function01",
-						Args:     []string{"arg1", "arg2"},
-					},
-					ID: "txdata01",
-				},
-				Signature: nil,
-			},
-			&DefaultTransaction{
-				PeerID:    "p02",
-				ID:        "tx02",
-				Status:    0,
-				Timestamp: testingTime,
-				TxData: &TxData{
-					Jsonrpc: "jsonRPC02",
-					Method:  "invoke",
-					Params: Params{
-						Type:     0,
-						Function: "function02",
-						Args:     []string{"arg1", "arg2"},
-					},
-					ID: "txdata02",
-				},
-				Signature: nil,
-			},
-			&DefaultTransaction{
-				PeerID:    "p03",
-				ID:        "tx03",
-				Status:    0,
-				Timestamp: testingTime,
-				TxData: &TxData{
-					Jsonrpc: "jsonRPC03",
-					Method:  "invoke",
-					Params: Params{
-						Type:     0,
-						Function: "function03",
-						Args:     []string{"arg1", "arg2"},
-					},
-					ID: "txdata03",
-				},
-				Signature: nil,
-			},
-			&DefaultTransaction{
-				PeerID:    "p04",
-				ID:        "tx04",
-				Status:    0,
-				Timestamp: testingTime,
-				TxData: &TxData{
-					Jsonrpc: "jsonRPC04",
-					Method:  "invoke",
-					Params: Params{
-						Type:     0,
-						Function: "function04",
-						Args:     []string{"arg1", "arg2"},
-					},
-					ID: "txdata04",
-				},
-				Signature: nil,
-			},
-		},
-	}[index]
 }

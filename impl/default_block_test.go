@@ -32,7 +32,7 @@ func getNewBlock() *DefaultBlock {
 	testingTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (UTC)")
 	blockCreator := []byte("testUser")
 	genesisSeal := []byte("genesis")
-	txList := getTxList(testingTime)
+	txList := getTestingTxList(0)
 
 	block := NewEmptyBlock(genesisSeal, 0, blockCreator)
 	block.SetTimestamp(testingTime)
@@ -47,77 +47,4 @@ func getNewBlock() *DefaultBlock {
 	block.SetSeal(seal)
 
 	return block
-}
-
-func getTxList(testingTime time.Time) []*DefaultTransaction {
-	return []*DefaultTransaction{
-		{
-			PeerID:    "p01",
-			ID:        "tx01",
-			Status:    0,
-			Timestamp: testingTime,
-			TxData: &TxData{
-				Jsonrpc: "jsonRPC01",
-				Method:  "invoke",
-				Params: Params{
-					Type:     0,
-					Function: "function01",
-					Args:     []string{"arg1", "arg2"},
-				},
-				ID: "txdata01",
-			},
-			Signature: nil,
-		},
-		{
-			PeerID:    "p02",
-			ID:        "tx02",
-			Status:    0,
-			Timestamp: testingTime,
-			TxData: &TxData{
-				Jsonrpc: "jsonRPC02",
-				Method:  "invoke",
-				Params: Params{
-					Type:     0,
-					Function: "function02",
-					Args:     []string{"arg1", "arg2"},
-				},
-				ID: "txdata02",
-			},
-			Signature: nil,
-		},
-		{
-			PeerID:    "p03",
-			ID:        "tx03",
-			Status:    0,
-			Timestamp: testingTime,
-			TxData: &TxData{
-				Jsonrpc: "jsonRPC03",
-				Method:  "invoke",
-				Params: Params{
-					Type:     0,
-					Function: "function03",
-					Args:     []string{"arg1", "arg2"},
-				},
-				ID: "txdata03",
-			},
-			Signature: nil,
-		},
-		{
-			PeerID:    "p04",
-			ID:        "tx04",
-			Status:    0,
-			Timestamp: testingTime,
-			TxData: &TxData{
-				Jsonrpc: "jsonRPC04",
-				Method:  "invoke",
-				Params: Params{
-					Type:     0,
-					Function: "function04",
-					Args:     []string{"arg1", "arg2"},
-				},
-				ID: "txdata04",
-			},
-			Signature: nil,
-		},
-	}
 }
