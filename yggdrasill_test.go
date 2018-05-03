@@ -13,6 +13,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestYggdrasill_NewYggdrasill_NoValidator(t *testing.T) {
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	_, err := NewYggdrasill(db, nil, opts)
+	assert.Error(t, err)
+}
+
 func TestYggdrasill_AddBlock(t *testing.T) {
 
 	dbPath := "./.db"
@@ -103,6 +114,19 @@ func TestYggdrasill_AddBlock3(t *testing.T) {
 
 	err = y.AddBlock(block2)
 	assert.Error(t, err)
+}
+
+func TestYggdrasill_AddBlock_NoValidator(t *testing.T) {
+	dbPath := "./.db"
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	dbProvider := CreateNewDBProvider(db)
+	y := Yggdrasill{dbProvider, nil}
+
+	block := getNewBlock([]byte("genesis"), 0)
+	err := y.AddBlock(block)
+	assert.Error(t, err)
+	y.Close()
 }
 
 func TestYggdrasill_GetBlockByHeight(t *testing.T) {
