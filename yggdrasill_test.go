@@ -13,22 +13,37 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestYggdrasill_AddBlock(t *testing.T) {
-
+func TestYggdrasill_NewYggdrasill_NoValidator(t *testing.T) {
 	dbPath := "./.db"
 	opts := map[string]interface{}{
 		"db_path": dbPath,
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	_, err := NewYggdrasill(db, nil, opts)
+	assert.Error(t, err)
+}
+
+func TestYggdrasill_AddBlock_OneBlock(t *testing.T) {
+
+	dbPath := "./.db"
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	y, err := NewYggdrasill(db, validator, opts)
+	assert.NoError(t, err)
+
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
 	}()
 
 	firstBlock := getNewBlock([]byte("genesis"), 0)
-	err := y.AddBlock(firstBlock)
+	err = y.AddBlock(firstBlock)
 	assert.NoError(t, err)
 
 	lastBlock := &impl.DefaultBlock{}
@@ -44,15 +59,18 @@ func TestYggdrasill_AddBlock(t *testing.T) {
 	//fmt.Print(lastBlock)
 }
 
-func TestYggdrasill_AddBlock2(t *testing.T) {
+func TestYggdrasill_AddBlock_TwoBlocks(t *testing.T) {
 
 	dbPath := "./.db"
 	opts := map[string]interface{}{
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y, err := NewYggdrasill(db, validator, opts)
+	assert.NoError(t, err)
 
 	defer func() {
 		y.Close()
@@ -62,7 +80,7 @@ func TestYggdrasill_AddBlock2(t *testing.T) {
 	block1 := getNewBlock([]byte("genesis"), 0)
 	block2 := getNewBlock(block1.GetSeal(), 1)
 
-	err := y.AddBlock(block1)
+	err = y.AddBlock(block1)
 	assert.NoError(t, err)
 
 	err = y.AddBlock(block2)
@@ -70,15 +88,18 @@ func TestYggdrasill_AddBlock2(t *testing.T) {
 }
 
 // PrevSeal 값을 잘못 입력해서 에러를 출력.
-func TestYggdrasill_AddBlock3(t *testing.T) {
+func TestYggdrasill_AddBlock_WrongPrevSeal(t *testing.T) {
 
 	dbPath := "./.db"
 	opts := map[string]interface{}{
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y, err := NewYggdrasill(db, validator, opts)
+	assert.NoError(t, err)
 
 	defer func() {
 		y.Close()
@@ -88,11 +109,24 @@ func TestYggdrasill_AddBlock3(t *testing.T) {
 	block1 := getNewBlock([]byte("genesis"), 0)
 	block2 := getNewBlock([]byte("genesis"), 1)
 
-	err := y.AddBlock(block1)
+	err = y.AddBlock(block1)
 	assert.NoError(t, err)
 
 	err = y.AddBlock(block2)
 	assert.Error(t, err)
+}
+
+func TestYggdrasill_AddBlock_NoValidator(t *testing.T) {
+	dbPath := "./.db"
+
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	dbProvider := CreateNewDBProvider(db)
+	y := Yggdrasill{dbProvider, nil}
+
+	block := getNewBlock([]byte("genesis"), 0)
+	err := y.AddBlock(block)
+	assert.Error(t, err)
+	y.Close()
 }
 
 func TestYggdrasill_GetBlockByHeight(t *testing.T) {
@@ -102,8 +136,11 @@ func TestYggdrasill_GetBlockByHeight(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y, err := NewYggdrasill(db, validator, opts)
+	assert.NoError(t, err)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -121,7 +158,7 @@ func TestYggdrasill_GetBlockByHeight(t *testing.T) {
 	randomNumber := uint64(rand.Intn(100))
 
 	retrievedBlock := &impl.DefaultBlock{}
-	err := y.GetBlockByHeight(retrievedBlock, randomNumber)
+	err = y.GetBlockByHeight(retrievedBlock, randomNumber)
 
 	assert.NoError(t, err)
 	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
@@ -134,8 +171,11 @@ func TestYggdrasil_GetBlockBySeal(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y, err := NewYggdrasill(db, validator, opts)
+	assert.NoError(t, err)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -157,7 +197,7 @@ func TestYggdrasil_GetBlockBySeal(t *testing.T) {
 	}
 
 	retrievedBlock := &impl.DefaultBlock{}
-	err := y.GetBlockBySeal(retrievedBlock, testSeal)
+	err = y.GetBlockBySeal(retrievedBlock, testSeal)
 
 	assert.NoError(t, err)
 	assert.Equal(t, randomNumber, retrievedBlock.GetHeight())
@@ -171,8 +211,11 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y, err := NewYggdrasill(db, validator, opts)
+	assert.NoError(t, err)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -194,7 +237,7 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 	}
 
 	retrievedBlock := &impl.DefaultBlock{}
-	err := y.GetLastBlock(retrievedBlock)
+	err = y.GetLastBlock(retrievedBlock)
 
 	assert.NoError(t, err)
 	assert.Equal(t, uint64(99), retrievedBlock.GetHeight())
@@ -209,8 +252,11 @@ func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y, err := NewYggdrasill(db, validator, opts)
+	assert.NoError(t, err)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -218,7 +264,7 @@ func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 
 	firstBlock := getNewBlock([]byte("genesis"), 0)
 
-	err := y.AddBlock(firstBlock)
+	err = y.AddBlock(firstBlock)
 	assert.NoError(t, err)
 
 	//when
@@ -238,8 +284,11 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 		"db_path": dbPath,
 	}
 
+	var validator common.Validator
+	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y := NewYggdrasill(db, nil, opts)
+	y, err := NewYggdrasill(db, validator, opts)
+	assert.NoError(t, err)
 	defer func() {
 		y.Close()
 		os.RemoveAll(dbPath)
@@ -247,7 +296,7 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 
 	firstBlock := getNewBlock([]byte("genesis"), 0)
 
-	err := y.AddBlock(firstBlock)
+	err = y.AddBlock(firstBlock)
 	assert.NoError(t, err)
 
 	//when
