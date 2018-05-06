@@ -62,7 +62,7 @@ blockSeal, _ := v.BuildSeal(block)
 block.SetSeal(blockSeal)
 ```
 
-### `DefaultValidator"
+### `DefaultValidator`
 ```go
 v := &validator.DefaultValidator{}
 ```
