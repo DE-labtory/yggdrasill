@@ -12,6 +12,12 @@ func calculateHash(b []byte) []byte {
 	return hashValue.Sum(nil)
 }
 
+func CalculateHash(b []byte) []byte {
+	hashValue := sha256.New()
+	hashValue.Write(b)
+	return hashValue.Sum(nil)
+}
+
 func convertType(txList []*DefaultTransaction) []common.Transaction {
 	convTxList := make([]common.Transaction, 0)
 	for _, tx := range txList {

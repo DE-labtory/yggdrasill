@@ -59,7 +59,6 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 	blockSealDB := y.DBProvider.GetDBHandle(blockSealDB)
 	blockHeightDB := y.DBProvider.GetDBHandle(blockHeightDB)
 	transactionDB := y.DBProvider.GetDBHandle(transactionDB)
-
 	err = blockSealDB.Put(block.GetSeal(), serializedBlock, true)
 	if err != nil {
 		return err
@@ -173,15 +172,12 @@ func (y *Yggdrasill) validateBlock(block common.Block) error {
 	if err != nil {
 		return err
 	}
-
-	// Check if the new block has a correct pointer to the last block
 	if lastBlockByte != nil && !block.IsPrev(lastBlockByte) {
 		return ErrPrevSealMismatch
 	}
 
 	// Validate the Seal of the new block using the validator
 	result, err := y.validator.ValidateSeal(block.GetSeal(), block)
-
 	if err != nil {
 		return err
 	}

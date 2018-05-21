@@ -15,11 +15,12 @@ type DefaultValidator struct{}
 
 // ValidateSeal 함수는 원래 Seal 값과 주어진 Seal 값(comparisonSeal)을 비교하여, 올바른지 검증한다.
 func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock common.Block) (bool, error) {
+
 	comparisonSeal, error := t.BuildSeal(comparisonBlock)
+
 	if error != nil {
 		return false, error
 	}
-
 	return bytes.Compare(seal, comparisonSeal) == 0, nil
 }
 
@@ -107,13 +108,18 @@ func (t *DefaultValidator) BuildSeal(block common.Block) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	prevSeal, txListSeal, creator := block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator()
 
 	if prevSeal == nil || txListSeal == nil || creator == nil {
 		return nil, common.ErrInsufficientFields
 	}
-
-	rootHash := txListSeal[0]
+	var rootHash []byte
+	if len(txListSeal) == 0 {
+		rootHash = make([]byte, 0)
+	} else {
+		rootHash = txListSeal[0]
+	}
 	combined := append(prevSeal, rootHash...)
 	combined = append(combined, timestamp...)
 

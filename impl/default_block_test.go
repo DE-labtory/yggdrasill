@@ -16,14 +16,11 @@ func TestNewEmptyBlock(t *testing.T) {
 
 func TestSerializeAndDeserialize(t *testing.T) {
 	block := getNewBlock()
-
 	serializedBlock, err := block.Serialize()
 	assert.NoError(t, err)
-
 	deserializedBlock := &DefaultBlock{}
 	err = deserializedBlock.Deserialize(serializedBlock)
 	assert.NoError(t, err)
-
 	assert.Equal(t, deserializedBlock, block)
 }
 
@@ -33,7 +30,6 @@ func getNewBlock() *DefaultBlock {
 	blockCreator := []byte("testUser")
 	genesisSeal := []byte("genesis")
 	txList := getTestingTxList(0)
-
 	block := NewEmptyBlock(genesisSeal, 0, blockCreator)
 	block.SetTimestamp(testingTime)
 	for _, tx := range txList {
