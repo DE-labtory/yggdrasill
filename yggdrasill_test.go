@@ -7,8 +7,6 @@ import (
 
 	"time"
 
-	"fmt"
-
 	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/yggdrasill/impl"
@@ -58,8 +56,6 @@ func TestYggdrasill_AddBlock_OneBlock(t *testing.T) {
 	assert.Equal(t, uint64(0), lastBlock.GetHeight())
 	assert.Equal(t, []byte("testUser"), lastBlock.GetCreator())
 	assert.Equal(t, "tx01", lastBlock.GetTxList()[0].GetID())
-
-	//fmt.Print(lastBlock)
 }
 
 func TestYggdrasill_AddBlock_TwoBlocks(t *testing.T) {
@@ -298,9 +294,6 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 	}()
 
 	firstBlock := getNewBlock([]byte("genesis"), 0)
-	fmt.Println("firstblock")
-	fmt.Println(firstBlock.PrevSeal)
-
 	err = y.AddBlock(firstBlock)
 	assert.NoError(t, err)
 
@@ -317,19 +310,13 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 func getNewBlock(prevSeal []byte, height uint64) *impl.DefaultBlock {
 	validator := &impl.DefaultValidator{}
 	testingTime := getTime()
-	fmt.Println("testingTime:")
-	fmt.Println(testingTime)
 	blockCreator := []byte("testUser")
 	txList := getTxList(testingTime)
-	fmt.Println("Debugging")
-	fmt.Println(txList)
-
 	block := impl.NewEmptyBlock(prevSeal, height, blockCreator)
 	block.SetTimestamp(testingTime)
 	for _, tx := range txList {
 		block.PutTx(tx)
 	}
-
 	txSeal, _ := validator.BuildTxSeal(convertTxListType(txList))
 	block.SetTxSeal(txSeal)
 
