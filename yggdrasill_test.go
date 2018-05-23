@@ -43,6 +43,7 @@ func TestYggdrasill_AddBlock_OneBlock(t *testing.T) {
 	}()
 
 	firstBlock := getNewBlock([]byte("genesis"), 0)
+
 	err = y.AddBlock(firstBlock)
 	assert.NoError(t, err)
 
@@ -55,8 +56,6 @@ func TestYggdrasill_AddBlock_OneBlock(t *testing.T) {
 	assert.Equal(t, uint64(0), lastBlock.GetHeight())
 	assert.Equal(t, []byte("testUser"), lastBlock.GetCreator())
 	assert.Equal(t, "tx01", lastBlock.GetTxList()[0].GetID())
-
-	//fmt.Print(lastBlock)
 }
 
 func TestYggdrasill_AddBlock_TwoBlocks(t *testing.T) {
@@ -295,7 +294,6 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 	}()
 
 	firstBlock := getNewBlock([]byte("genesis"), 0)
-
 	err = y.AddBlock(firstBlock)
 	assert.NoError(t, err)
 
@@ -306,6 +304,7 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 
 	//then
 	assert.Equal(t, firstBlock, retrievedBlock)
+
 }
 
 func getNewBlock(prevSeal []byte, height uint64) *impl.DefaultBlock {
@@ -313,13 +312,11 @@ func getNewBlock(prevSeal []byte, height uint64) *impl.DefaultBlock {
 	testingTime := getTime()
 	blockCreator := []byte("testUser")
 	txList := getTxList(testingTime)
-
 	block := impl.NewEmptyBlock(prevSeal, height, blockCreator)
 	block.SetTimestamp(testingTime)
 	for _, tx := range txList {
 		block.PutTx(tx)
 	}
-
 	txSeal, _ := validator.BuildTxSeal(convertTxListType(txList))
 	block.SetTxSeal(txSeal)
 
