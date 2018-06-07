@@ -22,6 +22,17 @@ var ErrTxSealValidation = errors.New("txSeal validation failed")
 var ErrNoRequiredParameters = errors.New("required parameters not passed")
 var ErrNoValidator = errors.New("validator not defined")
 
+type BlockStorageManager interface {
+	Close()
+	GetValidator() common.Validator
+	AddBlock(block common.Block) error
+	GetBlockByHeight(block common.Block, blockHeight uint64) error
+	GetBlockBySeal(block common.Block, seal []byte) error
+	GetBlockByTxID(block common.Block, txid string) error
+	GetLastBlock(block common.Block) error
+	GetTransactionByTxID(transaction common.Transaction, txid string) error
+}
+
 type Yggdrasill struct {
 	DBProvider *DBProvider
 	validator  common.Validator
@@ -159,6 +170,10 @@ func (y *Yggdrasill) GetTransactionByTxID(transaction common.Transaction, txID s
 	err = transaction.Deserialize(serializedTX)
 
 	return err
+}
+
+func (y *Yggdrasill) GetValidator() *common.Validator {
+	return &y.validator
 }
 
 func (y *Yggdrasill) validateBlock(block common.Block) error {
