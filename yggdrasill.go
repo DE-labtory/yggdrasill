@@ -33,29 +33,29 @@ type BlockStorageManager interface {
 	GetTransactionByTxID(transaction common.Transaction, txid string) error
 }
 
-type Yggdrasill struct {
+type BlockStorage struct {
 	DBProvider *DBProvider
 	validator  common.Validator
 }
 
-// NewYggdrasill 함수는 새로운 Yggdrasill 객체를 생성한다. keyValueDB와 validator는 필수이며, opts는 현재 지원되지 않는다.
-func NewYggdrasill(keyValueDB key_value_db.KeyValueDB, validator common.Validator, opts map[string]interface{}) (*Yggdrasill, error) {
+// NewBlockStorage 함수는 새로운 BlockStorage 객체를 생성한다. keyValueDB와 validator는 필수이며, opts는 현재 지원되지 않는다.
+func NewBlockStorage(keyValueDB key_value_db.KeyValueDB, validator common.Validator, opts map[string]interface{}) (*BlockStorage, error) {
 	if keyValueDB == nil || validator == nil {
 		return nil, ErrNoRequiredParameters
 	}
 
 	dbProvider := CreateNewDBProvider(keyValueDB)
 
-	return &Yggdrasill{DBProvider: dbProvider, validator: validator}, nil
+	return &BlockStorage{DBProvider: dbProvider, validator: validator}, nil
 }
 
-// Close 함수는 Yggdrasill 객체의 DB를 닫는다.
-func (y *Yggdrasill) Close() {
+// Close 함수는 BlockStorage 객체의 DB를 닫는다.
+func (y *BlockStorage) Close() {
 	y.DBProvider.Close()
 }
 
 // AddBlock 함수는 새로운 Block을 Yggdrasill의 DB에 저장한다. 저장하기 전에 validator로 Block을 검증한다.
-func (y *Yggdrasill) AddBlock(block common.Block) error {
+func (y *BlockStorage) AddBlock(block common.Block) error {
 	serializedBlock, err := block.Serialize()
 	if err != nil {
 		return err
@@ -105,8 +105,8 @@ func (y *Yggdrasill) AddBlock(block common.Block) error {
 	return nil
 }
 
-// GetBlockByHeight 함수는 Yggdrasill 객체에 저장된 Block을 height 값으로 찾아 반환한다.
-func (y *Yggdrasill) GetBlockByHeight(block common.Block, height uint64) error {
+// GetBlockByHeight 함수는 BlockStorage 객체에 저장된 Block을 height 값으로 찾아 반환한다.
+func (y *BlockStorage) GetBlockByHeight(block common.Block, height uint64) error {
 	blockHeightDB := y.DBProvider.GetDBHandle(blockHeightDB)
 
 	blockSeal, err := blockHeightDB.Get([]byte(fmt.Sprint(height)))
@@ -117,8 +117,8 @@ func (y *Yggdrasill) GetBlockByHeight(block common.Block, height uint64) error {
 	return y.GetBlockBySeal(block, blockSeal)
 }
 
-// GetBlockBySeal 함수는 Yggdrasill 객체에 저장된 Block을 seal 값으로 찾아 반환한다.
-func (y *Yggdrasill) GetBlockBySeal(block common.Block, seal []byte) error {
+// GetBlockBySeal 함수는 BlockStorage 객체에 저장된 Block을 seal 값으로 찾아 반환한다.
+func (y *BlockStorage) GetBlockBySeal(block common.Block, seal []byte) error {
 	blockSealDB := y.DBProvider.GetDBHandle(blockSealDB)
 
 	serializedBlock, err := blockSealDB.Get(seal)
@@ -131,8 +131,8 @@ func (y *Yggdrasill) GetBlockBySeal(block common.Block, seal []byte) error {
 	return err
 }
 
-// GetBlockByTxID 함수는 Yggdrasill 객체에 저장된 Block을 Transaction의 ID 값으로 찾아 반환한다.
-func (y *Yggdrasill) GetBlockByTxID(block common.Block, txID string) error {
+// GetBlockByTxID 함수는 BlockStorage 객체에 저장된 Block을 Transaction의 ID 값으로 찾아 반환한다.
+func (y *BlockStorage) GetBlockByTxID(block common.Block, txID string) error {
 	utilDB := y.DBProvider.GetDBHandle(utilDB)
 
 	blockSeal, err := utilDB.Get([]byte(txID))
@@ -144,8 +144,8 @@ func (y *Yggdrasill) GetBlockByTxID(block common.Block, txID string) error {
 	return y.GetBlockBySeal(block, blockSeal)
 }
 
-// GetLastBlock 함수는 Yggdrasill 객체에 저장된 마지막 block을 반환한다.
-func (y *Yggdrasill) GetLastBlock(block common.Block) error {
+// GetLastBlock 함수는 BlockStorage 객체에 저장된 마지막 block을 반환한다.
+func (y *BlockStorage) GetLastBlock(block common.Block) error {
 	utilDB := y.DBProvider.GetDBHandle(utilDB)
 
 	serializedBlock, err := utilDB.Get([]byte(lastBlockKey))
@@ -158,8 +158,8 @@ func (y *Yggdrasill) GetLastBlock(block common.Block) error {
 	return err
 }
 
-// GetTransactionByTxID 함수는 Yggdrasill 객체에 저장된 Block 안에 저장된 Transaction을 ID 값으로 찾아 반환한다.
-func (y *Yggdrasill) GetTransactionByTxID(transaction common.Transaction, txID string) error {
+// GetTransactionByTxID 함수는 BlockStorage 객체에 저장된 Block 안에 저장된 Transaction을 ID 값으로 찾아 반환한다.
+func (y *BlockStorage) GetTransactionByTxID(transaction common.Transaction, txID string) error {
 	transactionDB := y.DBProvider.GetDBHandle(transactionDB)
 
 	serializedTX, err := transactionDB.Get([]byte(txID))
@@ -172,11 +172,11 @@ func (y *Yggdrasill) GetTransactionByTxID(transaction common.Transaction, txID s
 	return err
 }
 
-func (y *Yggdrasill) GetValidator() *common.Validator {
+func (y *BlockStorage) GetValidator() *common.Validator {
 	return &y.validator
 }
 
-func (y *Yggdrasill) validateBlock(block common.Block) error {
+func (y *BlockStorage) validateBlock(block common.Block) error {
 	if y.validator == nil {
 		return ErrNoValidator
 	}
