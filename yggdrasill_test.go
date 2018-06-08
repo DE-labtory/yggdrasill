@@ -20,7 +20,7 @@ func TestYggdrasill_NewYggdrasill_NoValidator(t *testing.T) {
 	}
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	_, err := NewYggdrasill(db, nil, opts)
+	_, err := NewBlockStorage(db, nil, opts)
 	assert.Error(t, err)
 }
 
@@ -34,7 +34,7 @@ func TestYggdrasill_AddBlock_OneBlock(t *testing.T) {
 	var validator common.Validator
 	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y, err := NewYggdrasill(db, validator, opts)
+	y, err := NewBlockStorage(db, validator, opts)
 	assert.NoError(t, err)
 
 	defer func() {
@@ -68,7 +68,7 @@ func TestYggdrasill_AddBlock_TwoBlocks(t *testing.T) {
 	var validator common.Validator
 	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y, err := NewYggdrasill(db, validator, opts)
+	y, err := NewBlockStorage(db, validator, opts)
 	assert.NoError(t, err)
 
 	defer func() {
@@ -97,7 +97,7 @@ func TestYggdrasill_AddBlock_WrongPrevSeal(t *testing.T) {
 	var validator common.Validator
 	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y, err := NewYggdrasill(db, validator, opts)
+	y, err := NewBlockStorage(db, validator, opts)
 	assert.NoError(t, err)
 
 	defer func() {
@@ -120,7 +120,7 @@ func TestYggdrasill_AddBlock_NoValidator(t *testing.T) {
 
 	db := leveldbwrapper.CreateNewDB(dbPath)
 	dbProvider := CreateNewDBProvider(db)
-	y := Yggdrasill{dbProvider, nil}
+	y := BlockStorage{dbProvider, nil}
 
 	block := getNewBlock([]byte("genesis"), 0)
 	err := y.AddBlock(block)
@@ -138,7 +138,7 @@ func TestYggdrasill_GetBlockByHeight(t *testing.T) {
 	var validator common.Validator
 	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y, err := NewYggdrasill(db, validator, opts)
+	y, err := NewBlockStorage(db, validator, opts)
 	assert.NoError(t, err)
 	defer func() {
 		y.Close()
@@ -173,7 +173,7 @@ func TestYggdrasil_GetBlockBySeal(t *testing.T) {
 	var validator common.Validator
 	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y, err := NewYggdrasill(db, validator, opts)
+	y, err := NewBlockStorage(db, validator, opts)
 	assert.NoError(t, err)
 	defer func() {
 		y.Close()
@@ -213,7 +213,7 @@ func TestYggdrasil_GetLastBlock(t *testing.T) {
 	var validator common.Validator
 	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y, err := NewYggdrasill(db, validator, opts)
+	y, err := NewBlockStorage(db, validator, opts)
 	assert.NoError(t, err)
 	defer func() {
 		y.Close()
@@ -254,7 +254,7 @@ func TestYggdrasil_GetTransactionByTxID(t *testing.T) {
 	var validator common.Validator
 	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y, err := NewYggdrasill(db, validator, opts)
+	y, err := NewBlockStorage(db, validator, opts)
 	assert.NoError(t, err)
 	defer func() {
 		y.Close()
@@ -286,7 +286,7 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 	var validator common.Validator
 	validator = new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	y, err := NewYggdrasill(db, validator, opts)
+	y, err := NewBlockStorage(db, validator, opts)
 	assert.NoError(t, err)
 	defer func() {
 		y.Close()
