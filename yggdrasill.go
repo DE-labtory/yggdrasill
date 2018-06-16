@@ -172,8 +172,8 @@ func (y *BlockStorage) GetTransactionByTxID(transaction common.Transaction, txID
 	return err
 }
 
-func (y *BlockStorage) GetValidator() *common.Validator {
-	return &y.validator
+func (y *BlockStorage) GetValidator() common.Validator {
+	return y.validator
 }
 
 func (y *BlockStorage) validateBlock(block common.Block) error {
