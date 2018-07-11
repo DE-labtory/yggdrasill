@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 
+	"time"
+
 	"github.com/it-chain/yggdrasill/common"
 )
 
@@ -16,7 +18,7 @@ type DefaultValidator struct{}
 // ValidateSeal 함수는 원래 Seal 값과 주어진 Seal 값(comparisonSeal)을 비교하여, 올바른지 검증한다.
 func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock common.Block) (bool, error) {
 
-	comparisonSeal, error := t.BuildSeal(comparisonBlock)
+	comparisonSeal, error := t.BuildSeal(comparisonBlock.GetTimestamp(), comparisonBlock.GetPrevSeal(), comparisonBlock.GetTxSeal(), comparisonBlock.GetCreator())
 
 	if error != nil {
 		return false, error
@@ -103,22 +105,20 @@ func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction comm
 
 // BuildSeal 함수는 block 객체를 받아서 Seal 값을 만들고, Seal 값을 반환한다.
 // 인풋 파라미터의 block에 자동으로 할당해주지는 않는다.
-func (t *DefaultValidator) BuildSeal(block common.Block) ([]byte, error) {
-	timestamp, err := block.GetTimestamp().MarshalText()
+func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSeal [][]byte, creator []byte) ([]byte, error) {
+	timestamp, err := timeStamp.MarshalText()
 	if err != nil {
 		return nil, err
 	}
 
-	prevSeal, txListSeal, creator := block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator()
-
-	if prevSeal == nil || txListSeal == nil || creator == nil {
+	if prevSeal == nil || txSeal == nil || creator == nil {
 		return nil, common.ErrInsufficientFields
 	}
 	var rootHash []byte
-	if len(txListSeal) == 0 {
+	if len(txSeal) == 0 {
 		rootHash = make([]byte, 0)
 	} else {
-		rootHash = txListSeal[0]
+		rootHash = txSeal[0]
 	}
 	combined := append(prevSeal, rootHash...)
 	combined = append(combined, timestamp...)

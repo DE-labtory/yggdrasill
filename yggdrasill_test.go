@@ -49,6 +49,7 @@ func TestYggdrasill_AddBlock_OneBlock(t *testing.T) {
 
 	lastBlock := &impl.DefaultBlock{}
 	err = y.GetLastBlock(lastBlock)
+
 	assert.NoError(t, err)
 
 	assert.Equal(t, firstBlock.GetHeight(), lastBlock.GetHeight())
@@ -320,7 +321,7 @@ func getNewBlock(prevSeal []byte, height uint64) *impl.DefaultBlock {
 	txSeal, _ := validator.BuildTxSeal(convertTxListType(txList))
 	block.SetTxSeal(txSeal)
 
-	seal, _ := validator.BuildSeal(block)
+	seal, _ := validator.BuildSeal(block.GetTimestamp(), block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator())
 	block.SetSeal(seal)
 
 	return block

@@ -39,7 +39,7 @@ func getNewBlock() *DefaultBlock {
 	txSeal, _ := validator.BuildTxSeal(convertType(txList))
 	block.SetTxSeal(txSeal)
 
-	seal, _ := validator.BuildSeal(block)
+	seal, _ := validator.BuildSeal(block.GetTimestamp(), block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator())
 	block.SetSeal(seal)
 
 	return block
