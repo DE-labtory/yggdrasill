@@ -26,7 +26,7 @@ type BlockStorageManager interface {
 	Close()
 	GetValidator() common.Validator
 	AddBlock(block common.Block) error
-	GetBlockByHeight(block common.Block, blockHeight uint64) error
+	GetBlockByHeight(block common.Block, height uint64) error
 	GetBlockBySeal(block common.Block, seal []byte) error
 	GetBlockByTxID(block common.Block, txid string) error
 	GetLastBlock(block common.Block) error
