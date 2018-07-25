@@ -1,0 +1,20 @@
+language: go
+
+go:
+  - "1.10"
+
+notifications:
+  email: false
+
+git:
+  depth: 1
+
+os: linux
+
+script:
+  - diff <(goimports -d $(find . -type f -name '*.go' -not -path "./vendor/*")) <(printf "")
+  - go test -v ./...
+
+before_install:
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - go get golang.org/x/tools/cmd/goimports
