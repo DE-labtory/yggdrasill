@@ -29,6 +29,11 @@ func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock common.Bloc
 // ValidateTxSeal 함수는 주어진 Transaction 리스트에 따라 주어진 transaction Seal을 검증함.
 func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []common.Transaction) (bool, error) {
 	leafNodeIndex := 0
+
+	if len(txList)%2 != 0 {
+		txList = append(txList, txList[len(txList)-1])
+	}
+
 	for i, n := range txSeal {
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
 		if rightIndex >= len(txSeal) {

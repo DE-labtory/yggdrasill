@@ -18,8 +18,20 @@ func TestDefaultValidator_BuildTxSeal(t *testing.T) {
 	assert.Equal(t, expectedTxSealRoot, gotTxSeal[0])
 }
 
-func TestDefaultValidator_ValidateTxProof(t *testing.T) {
+func TestDefaultValidator_ValidateTxSeal_EvenNumOfTx(t *testing.T) {
 	testData := getTestingTxList(0)
+	validator := &DefaultValidator{}
+	convTestData := convertType(testData)
+
+	txSeal, err := validator.BuildTxSeal(convTestData)
+	assert.NoError(t, err)
+
+	validationResult, err := validator.ValidateTxSeal(txSeal, convTestData)
+	assert.Equal(t, true, validationResult)
+}
+
+func TestDefaultValidator_ValidateTxSeal_OddNumOfTx(t *testing.T) {
+	testData := getTestingTxList(1)
 	validator := &DefaultValidator{}
 	convTestData := convertType(testData)
 
