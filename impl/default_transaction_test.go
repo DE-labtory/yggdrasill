@@ -121,5 +121,58 @@ func getTestingTxList(index int) []*DefaultTransaction {
 				Signature: nil,
 			},
 		},
+		{
+			&DefaultTransaction{
+				PeerID:    "p01",
+				ID:        "tx01",
+				Status:    0,
+				Timestamp: testingTime,
+				TxData: &TxData{
+					Jsonrpc: "jsonRPC01",
+					Method:  "invoke",
+					Params: Params{
+						Type:     0,
+						Function: "function01",
+						Args:     []string{"arg1", "arg2"},
+					},
+					ID: "txdata01",
+				},
+				Signature: nil,
+			},
+			&DefaultTransaction{
+				PeerID:    "p02",
+				ID:        "tx02",
+				Status:    0,
+				Timestamp: testingTime,
+				TxData: &TxData{
+					Jsonrpc: "jsonRPC02",
+					Method:  "invoke",
+					Params: Params{
+						Type:     0,
+						Function: "function02",
+						Args:     []string{"arg1", "arg2"},
+					},
+					ID: "txdata02",
+				},
+				Signature: nil,
+			},
+			&DefaultTransaction{
+				PeerID:    "p03",
+				ID:        "tx03",
+				Status:    0,
+				Timestamp: testingTime,
+				TxData: &TxData{
+					Jsonrpc: "jsonRPC03",
+					Method:  "invoke",
+					Params: Params{
+						Type:     0,
+						Function: "function03",
+						Args:     []string{"arg1", "arg2"},
+					},
+					ID: "txdata03",
+				},
+				Signature: nil,
+			},
+		},
 	}[index]
 }
