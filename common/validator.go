@@ -7,7 +7,7 @@ import "time"
 // Default 구현체는 Merkle Tree를 기반으로 Seal을 만들고, 검증한다.
 type Validator interface {
 	// Seal들을 작성해주는 함수들
-	BuildSeal(timeStamp time.Time, prevSeal []byte, txSeal [][]byte, creator []byte) ([]byte, error)
+	BuildSeal(timeStamp time.Time, prevSeal []byte, txSeal [][]byte, creator string) ([]byte, error)
 	BuildTxSeal(txList []Transaction) ([][]byte, error)
 
 	// Seal들을 검증해주는 함수들

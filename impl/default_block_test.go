@@ -27,7 +27,7 @@ func TestSerializeAndDeserialize(t *testing.T) {
 func getNewBlock() *DefaultBlock {
 	validator := &DefaultValidator{}
 	testingTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (UTC)")
-	blockCreator := []byte("testUser")
+	blockCreator := "testUser"
 	genesisSeal := []byte("genesis")
 	txList := getTestingTxList(0)
 	block := NewEmptyBlock(genesisSeal, 0, blockCreator)

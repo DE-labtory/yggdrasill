@@ -17,7 +17,7 @@ type Block interface {
 	SetHeight(height uint64)
 	PutTx(tx Transaction) error
 	SetTxSeal(txSeal [][]byte)
-	SetCreator(creator []byte)
+	SetCreator(creator string)
 	SetTimestamp(currentTime time.Time)
 
 	// Block의 required field getters
@@ -26,7 +26,7 @@ type Block interface {
 	GetHeight() uint64
 	GetTxList() []Transaction
 	GetTxSeal() [][]byte
-	GetCreator() []byte
+	GetCreator() string
 	GetTimestamp() time.Time
 
 	// Block을 저장을 위한 []byte로 변환 및 재변환
