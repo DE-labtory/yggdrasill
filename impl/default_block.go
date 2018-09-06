@@ -15,7 +15,7 @@ type DefaultBlock struct {
 	TxList    []*DefaultTransaction
 	TxSeal    [][]byte
 	Timestamp time.Time
-	Creator   []byte
+	Creator   string
 }
 
 func (block *DefaultBlock) SetSeal(seal []byte) {
@@ -49,7 +49,7 @@ func (block *DefaultBlock) SetTxSeal(txSeal [][]byte) {
 	block.TxSeal = txSeal
 }
 
-func (block *DefaultBlock) SetCreator(creator []byte) {
+func (block *DefaultBlock) SetCreator(creator string) {
 	block.Creator = creator
 }
 
@@ -81,7 +81,7 @@ func (block *DefaultBlock) GetTxSeal() [][]byte {
 	return block.TxSeal
 }
 
-func (block *DefaultBlock) GetCreator() []byte {
+func (block *DefaultBlock) GetCreator() string {
 	return block.Creator
 }
 
@@ -121,7 +121,7 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
-func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
+func NewEmptyBlock(prevSeal []byte, height uint64, creator string) *DefaultBlock {
 	block := &DefaultBlock{}
 
 	block.SetPrevSeal(prevSeal)

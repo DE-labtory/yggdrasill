@@ -39,7 +39,7 @@ tx := NewDefaultTransaction(senderID, txID, time, txData)
 ```go
 prevBlockSeal := []byte{...}
 height := 0
-blockCreatorID := []byte{...}
+blockCreatorID := "hero"
 
 // Define new empty block
 block := NewEmptyBlock(prevBlockSeal, height, blockCreatorID)

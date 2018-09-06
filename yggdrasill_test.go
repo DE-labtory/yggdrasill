@@ -7,7 +7,6 @@ import (
 
 	"time"
 
-	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
@@ -55,7 +54,7 @@ func TestYggdrasill_AddBlock_OneBlock(t *testing.T) {
 	assert.Equal(t, firstBlock.GetHeight(), lastBlock.GetHeight())
 	assert.Equal(t, uint64(0), firstBlock.GetHeight())
 	assert.Equal(t, uint64(0), lastBlock.GetHeight())
-	assert.Equal(t, []byte("testUser"), lastBlock.GetCreator())
+	assert.Equal(t, "testUser", lastBlock.GetCreator())
 	assert.Equal(t, "tx01", lastBlock.GetTxList()[0].GetID())
 }
 
@@ -311,7 +310,7 @@ func TestYggdrasil_GetBlockByTxID(t *testing.T) {
 func getNewBlock(prevSeal []byte, height uint64) *impl.DefaultBlock {
 	validator := &impl.DefaultValidator{}
 	testingTime := getTime()
-	blockCreator := []byte("testUser")
+	blockCreator := "testUser"
 	txList := getTxList(testingTime)
 	block := impl.NewEmptyBlock(prevSeal, height, blockCreator)
 	block.SetTimestamp(testingTime)
