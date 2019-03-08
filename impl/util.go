@@ -3,7 +3,7 @@ package impl
 import (
 	"crypto/sha256"
 
-	"github.com/it-chain/yggdrasill/common"
+	"github.com/DE-labtory/yggdrasill/common"
 )
 
 func calculateHash(b []byte) []byte {

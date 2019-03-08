@@ -3,7 +3,7 @@ package yggdrasill
 import (
 	"sync"
 
-	"github.com/it-chain/leveldb-wrapper/key_value_db"
+	"github.com/DE-labtory/leveldb-wrapper/key_value_db"
 )
 
 type DBHandle struct {

@@ -1,4 +1,4 @@
-# Yggdrasill [![Build Status](https://travis-ci.org/it-chain/engine.svg?branch=develop)](https://travis-ci.org/it-chain/engine)
+# Yggdrasill [![Build Status](https://travis-ci.org/DE-labtory/engine.svg?branch=develop)](https://travis-ci.org/DE-labtory/engine)
 
 <p align="center"><img src="./image/yggdrasil.jpeg"></p>
 

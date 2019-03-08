@@ -6,7 +6,7 @@ import (
 
 	"time"
 
-	"github.com/it-chain/yggdrasill/common"
+	"github.com/DE-labtory/yggdrasill/common"
 )
 
 // ErrHashCalculationFailed 변수는 Hash 계산 중 발생한 에러를 정의한다.

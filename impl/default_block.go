@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/it-chain/yggdrasill/common"
+	"github.com/DE-labtory/yggdrasill/common"
 )
 
 type DefaultBlock struct {
