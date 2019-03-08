@@ -7,9 +7,9 @@ import (
 
 	"time"
 
-	leveldbwrapper "github.com/it-chain/leveldb-wrapper"
-	"github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/yggdrasill/impl"
+	leveldbwrapper "github.com/DE-labtory/leveldb-wrapper"
+	"github.com/DE-labtory/yggdrasill/common"
+	"github.com/DE-labtory/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
 )
 

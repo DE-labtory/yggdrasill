@@ -18,7 +18,7 @@ GetTransactionByTxID(transaction common.Transaction, txID string) error
 GetBlockByTxID(block common.Block, txID string) error
 ```
 
-여기에 더해서, Yggdrasill 구조체는 [`github.com/it-chain/leveldb-wrapper`](https://github.com/it-chain/leveldb-wrapper) 프로젝트의 `key_value_db` 패키지의 `KeyValueDB` 인터페이스를 구현한 DB 구조체는 어떤 것이든 백엔드 DB 구현체로 사용할 수 있다.
+여기에 더해서, Yggdrasill 구조체는 [`github.com/DE-labtory/leveldb-wrapper`](https://github.com/DE-labtory/leveldb-wrapper) 프로젝트의 `key_value_db` 패키지의 `KeyValueDB` 인터페이스를 구현한 DB 구조체는 어떤 것이든 백엔드 DB 구현체로 사용할 수 있다.
 
 그리고 `impl` 패키지에는 이 인터페이스들을 구현한 구조체가 구현되어 있다. 일종의 예시이면서, 동시에 `it-chain-Engine`에서 사용될 것을 고려하여 구현되었다.
 

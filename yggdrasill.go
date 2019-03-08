@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/it-chain/leveldb-wrapper/key_value_db"
-	"github.com/it-chain/yggdrasill/common"
+	"github.com/DE-labtory/leveldb-wrapper/key_value_db"
+	"github.com/DE-labtory/yggdrasill/common"
 )
 
 const (
